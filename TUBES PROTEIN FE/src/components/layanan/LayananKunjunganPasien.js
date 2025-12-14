@@ -61,8 +61,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
     }
   };
 
-  const handleSearch = (e) => {
-    const query = e.target.value;
+  const handleSearch = (query) => {
     setSearchQuery(query);
     fetchRiwayatPelayanan(query);
   };
@@ -236,7 +235,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                     className="kunjungan-search-input"
                     placeholder="Cari Nama Pasien..."
                     value={searchQuery}
-                    onChange={handleSearch}
+                    onChange={(e) => handleSearch(e.target.value)}
                   />
                   <button className="kunjungan-search-btn">
                     🔍

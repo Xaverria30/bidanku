@@ -176,16 +176,23 @@ const updateProfile = async (req, res) => {
   const { password } = req.body;
 
   try {
+    console.log('📝 Update Profile Request:');
+    console.log('   User ID:', req.user.id);
+    console.log('   Request body:', { ...req.body, password: password ? '[HIDDEN]' : undefined });
+
     let hashedPassword = null;
 
     if (password) {
       hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      console.log('   🔐 Password will be updated');
     }
 
     const updatedData = await authService.updateProfile(req.user.id, req.body, hashedPassword);
+    console.log('✅ Profile updated successfully:', { id_user: updatedData.id_user, nama_lengkap: updatedData.nama_lengkap });
 
     return success(res, 'Profil berhasil diperbarui', updatedData);
   } catch (error) {
+    console.error('❌ Update profile error:', error);
     if (error.code === 'ER_DUP_ENTRY') {
       const message = error.sqlMessage?.includes('username')
         ? 'Username sudah digunakan'

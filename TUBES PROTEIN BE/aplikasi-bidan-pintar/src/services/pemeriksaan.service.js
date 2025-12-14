@@ -8,17 +8,47 @@ const { v4: uuidv4 } = require('uuid');
 const auditService = require('./audit.service');
 
 /**
- * Get all examination records
+ * Get all examination records with optional filtering
+ * @param {string} jenisLayanan - Filter by service type (optional)
+ * @param {string} search - Search by patient name (optional)
  * @returns {Array} List of examinations
  */
-const getAllPemeriksaan = async () => {
-  const query = `
+const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
+  console.log('🔍 Service getAllPemeriksaan called with:', { jenisLayanan, search });
+  
+  // Normalize empty strings to null
+  jenisLayanan = jenisLayanan && jenisLayanan.trim() !== '' ? jenisLayanan.trim() : null;
+  search = search && search.trim() !== '' ? search.trim() : null;
+  
+  console.log('🔍 After normalization:', { jenisLayanan, search });
+  
+  let query = `
     SELECT p.*, pas.nama AS nama_pasien
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
-    ORDER BY p.tanggal_pemeriksaan DESC
+    WHERE 1=1
   `;
-  const [rows] = await db.query(query);
+  const params = [];
+
+  // Filter by jenis_layanan if provided
+  if (jenisLayanan) {
+    query += ` AND p.jenis_layanan = ?`;
+    params.push(jenisLayanan);
+    console.log('  ➕ Added jenis_layanan filter:', jenisLayanan);
+  }
+
+  // Search by patient name if provided
+  if (search) {
+    query += ` AND pas.nama LIKE ?`;
+    params.push(`%${search}%`);
+    console.log('  ➕ Added search filter:', search);
+  }
+
+  query += ` ORDER BY p.tanggal_pemeriksaan DESC`;
+
+  console.log('  📝 Final query params:', params);
+  const [rows] = await db.query(query, params);
+  console.log('  ✅ Query returned:', rows.length, 'rows');
   return rows;
 };
 

@@ -8,13 +8,17 @@ const { success, created, notFound, serverError } = require('../utils/response')
 
 /**
  * Get all examination records
- * GET /api/pemeriksaan
+ * GET /api/pemeriksaan?jenis_layanan=ANC&search=nama
  */
 const getAllPemeriksaan = async (req, res) => {
   try {
-    const data = await pemeriksaanService.getAllPemeriksaan();
+    const { jenis_layanan, search } = req.query;
+    console.log('📥 GET /api/pemeriksaan - Query params:', { jenis_layanan, search });
+    const data = await pemeriksaanService.getAllPemeriksaan(jenis_layanan, search);
+    console.log('📤 Results found:', data.length);
     return success(res, 'Berhasil mengambil data pemeriksaan', data);
   } catch (error) {
+    console.error('❌ Error in getAllPemeriksaan:', error);
     return serverError(res, 'Gagal mengambil data pemeriksaan', error);
   }
 };

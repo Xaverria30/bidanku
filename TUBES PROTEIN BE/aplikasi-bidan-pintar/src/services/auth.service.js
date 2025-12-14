@@ -111,20 +111,45 @@ const verifyOTP = async (user, otp_code) => {
 const updateProfile = async (id_user, data, hashedPassword = null) => {
   const { nama_lengkap, username, email } = data;
   
-  const fields = ['nama_lengkap = ?', 'username = ?', 'email = ?'];
-  const params = [nama_lengkap, username, email];
+  const fields = [];
+  const params = [];
+
+  // Only update fields that are provided
+  if (nama_lengkap !== undefined) {
+    fields.push('nama_lengkap = ?');
+    params.push(nama_lengkap);
+  }
+
+  if (username !== undefined) {
+    fields.push('username = ?');
+    params.push(username);
+  }
+
+  if (email !== undefined) {
+    fields.push('email = ?');
+    params.push(email);
+  }
 
   if (hashedPassword) {
     fields.push('password = ?');
     params.push(hashedPassword);
   }
 
+  // If no fields to update, return current user data
+  if (fields.length === 0) {
+    return getUserById(id_user);
+  }
+
   params.push(id_user);
 
   const query = `UPDATE users SET ${fields.join(', ')} WHERE id_user = ?`;
-  await db.query(query, params);
+  console.log('🔄 Updating profile:', { query, params: params.map((p, i) => i === params.length - 1 ? 'user_id' : p) });
+  
+  const [result] = await db.query(query, params);
+  console.log('✅ Update result:', { affectedRows: result.affectedRows, changedRows: result.changedRows });
 
-  return { id_user, nama_lengkap, username, email };
+  // Return updated user data
+  return getUserById(id_user);
 };
 
 /**
