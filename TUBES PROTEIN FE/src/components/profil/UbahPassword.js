@@ -83,7 +83,8 @@ function UbahPassword({ onBack }) {
     setIsLoading(true);
     try {
       const response = await authService.updateProfile({
-        password: passwordBaru
+        password: passwordBaru,
+        passwordLama: passwordLama
       });
 
       if (response.success) {
@@ -124,19 +125,22 @@ function UbahPassword({ onBack }) {
     <div className="ubah-password-page">
       {/* Header */}
       <header className="ubah-password-header-page">
-        <div className="ubah-password-header-left">
-          <div className="ubah-password-header-icon">
-            <img src={pinkLogo} alt="Pink Logo" className="ubah-password-header-logo" />
-          </div>
-          <h1 className="ubah-password-header-title">Ubah Password</h1>
-        </div>
+        <h1 className="ubah-password-header-title">Ubah Password</h1>
         <button className="btn-kembali-ubah" onClick={onBack}>Kembali</button>
       </header>
 
       {/* Content */}
       <div className="ubah-password-content">
         <div className="ubah-password-card">
-          <form onSubmit={handleSubmit}>
+          {/* Left - Avatar */}
+          <div className="ubah-password-left">
+            <div className="ubah-password-avatar">
+              <img src={pinkLogo} alt="Logo" className="ubah-password-avatar-img" />
+            </div>
+          </div>
+
+          {/* Right - Form */}
+          <form onSubmit={handleSubmit} className="ubah-password-form-section">
             {/* Password Lama */}
             <div className="ubah-password-form-field">
               <label htmlFor="passwordLama">Password Lama</label>
@@ -190,14 +194,14 @@ function UbahPassword({ onBack }) {
 
             {/* Konfirmasi Password */}
             <div className="ubah-password-form-field">
-              <label htmlFor="konfirmasiPassword">Konfirmasi Password Baru</label>
+              <label htmlFor="konfirmasiPassword">Konfirmasi Password</label>
               <div className="ubah-password-form-input-wrapper">
                 <input
                   id="konfirmasiPassword"
                   type={showKonfirmasi ? 'text' : 'password'}
                   value={konfirmasiPassword}
                   onChange={(e) => setKonfirmasiPassword(e.target.value)}
-                  placeholder="Konfirmasi password baru"
+                  placeholder="Masukkan password baru"
                   disabled={isLoading}
                 />
                 <button
@@ -216,24 +220,14 @@ function UbahPassword({ onBack }) {
               )}
             </div>
 
-            {/* Actions */}
-            <div className="ubah-password-form-actions">
-              <button
-                type="button"
-                className="btn-form-batal"
-                onClick={onBack}
-                disabled={isLoading}
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                className="btn-form-ubah"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Memproses...' : 'Ubah Password'}
-              </button>
-            </div>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn-form-ubah"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Memproses...' : 'Simpan'}
+            </button>
           </form>
         </div>
       </div>

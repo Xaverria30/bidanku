@@ -73,16 +73,20 @@ const buildHeaders = (withAuth = true) => {
 /**
  * Handle API response
  * @param {Response} response - Fetch response
+ * @param {string} endpoint - API endpoint (for error handling logic)
  * @returns {Promise<object>} Parsed response data
  */
-const handleResponse = async (response) => {
+const handleResponse = async (response, endpoint = '') => {
   const data = await response.json();
   
   if (!response.ok) {
     // Handle specific error codes
     if (response.status === 401) {
-      clearAuth();
-      window.location.href = '/';
+      // For password change endpoint, just throw error without redirect
+      if (!endpoint.includes('/auth/me')) {
+        clearAuth();
+        window.location.href = '/';
+      }
     }
     
     const error = new Error(data.message || 'Terjadi kesalahan');
@@ -122,7 +126,7 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    return await handleResponse(response);
+    return await handleResponse(response, endpoint);
   } catch (error) {
     console.error(`API Error [${method} ${endpoint}]:`, error);
     throw error;
