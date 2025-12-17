@@ -83,7 +83,8 @@ function UbahPassword({ onBack }) {
     setIsLoading(true);
     try {
       const response = await authService.updateProfile({
-        password: passwordBaru
+        password: passwordBaru,
+        passwordLama: passwordLama
       });
 
       if (response.success) {
