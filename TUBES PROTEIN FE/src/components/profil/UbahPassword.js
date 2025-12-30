@@ -125,7 +125,12 @@ function UbahPassword({ onBack }) {
     <div className="ubah-password-page">
       {/* Header */}
       <header className="ubah-password-header-page">
-        <h1 className="ubah-password-header-title">Ubah Password</h1>
+        <div className="ubah-password-header-left">
+          <div className="ubah-password-header-icon">
+            <img src={pinkLogo} alt="Pink Logo" className="ubah-password-header-logo-img" />
+          </div>
+          <h1 className="ubah-password-header-title">Ubah Password</h1>
+        </div>
         <button className="btn-kembali-ubah" onClick={onBack}>Kembali</button>
       </header>
 

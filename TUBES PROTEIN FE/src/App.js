@@ -1,5 +1,6 @@
 import './App.css';
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import BuatAkun from './components/auth/BuatAkun';
 import Masuk from './components/auth/Masuk';
 import LupaPassword from './components/auth/LupaPassword';
@@ -27,10 +28,11 @@ import { useNotifikasi } from './components/notifikasi/useNotifikasi';
 import { getToken, getStoredUser, clearAuth } from './services/api';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('masuk');
-  const [previousPage, setPreviousPage] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [resetEmail, setResetEmail] = useState('');
   const [otpData, setOtpData] = useState({ email: '', usernameOrEmail: '' });
   const [selectedPasienId, setSelectedPasienId] = useState(null);
@@ -43,12 +45,12 @@ function App() {
     if (token && storedUser) {
       setIsLoggedIn(true);
       setUserData(storedUser);
-      setCurrentPage('dashboard');
     }
+    setIsLoading(false);
   }, []);
 
   const handleNavigate = (page, data = null) => {
-    setCurrentPage(page);
+    navigate(`/${page}`);
     if (page === 'verifikasi-otp' && data) {
       setOtpData(data);
     }
@@ -57,7 +59,7 @@ function App() {
   const handleLogin = (userData) => {
     setIsLoggedIn(true);
     setUserData(userData);
-    setCurrentPage('dashboard');
+    navigate('/dashboard');
     
     showNotifikasi({
       type: 'success-login',
@@ -74,7 +76,7 @@ function App() {
         clearAuth(); // Clear token and user from localStorage
         setIsLoggedIn(false);
         setUserData(null);
-        setCurrentPage('masuk');
+        navigate('/masuk');
         hideNotifikasi();
       },
       onCancel: hideNotifikasi,
@@ -83,83 +85,28 @@ function App() {
     });
   };
 
-  const handleToProfil = () => {
-    setCurrentPage('profil');
-  };
-
-  const handleToInformasiPengguna = () => {
-    setCurrentPage('informasi-pengguna');
-  };
-
-  const handleToUbahPassword = () => {
-    setCurrentPage('ubah-password');
-  };
-
-  const handleToDataPasien = () => {
-    setCurrentPage('data-pasien');
-  };
-
-  const handleToRiwayatDataMasuk = () => {
-    setCurrentPage('riwayat-data-masuk');
-  };
-
-  const handleToRiwayatUbahData = () => {
-    setCurrentPage('riwayat-ubah-data');
-  };
-
-  const handleToRiwayatMasukAkun = () => {
-    setCurrentPage('riwayat-masuk-akun');
-  };
-
-  const handleToJadwal = () => {
-    setCurrentPage('jadwal');
-  };
-
-  const handleToBuatJadwal = () => {
-    setPreviousPage(currentPage);
-    setCurrentPage('buat-jadwal');
-  };
-
-  const handleBackFromBuatJadwal = () => {
-    if (previousPage) {
-      setCurrentPage(previousPage);
-      setPreviousPage(null);
-    } else {
-      setCurrentPage('dashboard');
-    }
-  };
-
-  const handleToLaporan = () => {
-    setCurrentPage('laporan');
-  };
-
-  const handleToLayanan = () => {
-    setCurrentPage('layanan');
-  };
-
-  const handleToKB = () => {
-    setCurrentPage('kb');
-  };
-
-  const handleToPersalinan = () => {
-    setCurrentPage('persalinan');
-  };
-
-  const handleToANC = () => {
-    setCurrentPage('anc');
-  };
-
-  const handleToImunisasi = () => {
-    setCurrentPage('imunisasi');
-  };
-
-  const handleToKunjunganPasien = () => {
-    setCurrentPage('kunjungan-pasien');
-  };
+  const handleToProfil = () => navigate('/profil');
+  const handleToInformasiPengguna = () => navigate('/informasi-pengguna');
+  const handleToUbahPassword = () => navigate('/ubah-password');
+  const handleToDataPasien = () => navigate('/data-pasien');
+  const handleToRiwayatDataMasuk = () => navigate('/riwayat-data-masuk');
+  const handleToRiwayatUbahData = () => navigate('/riwayat-ubah-data');
+  const handleToRiwayatMasukAkun = () => navigate('/riwayat-masuk-akun');
+  const handleToJadwal = () => navigate('/jadwal');
+  const handleToBuatJadwal = () => navigate('/buat-jadwal');
+  const handleToLaporan = () => navigate('/laporan');
+  const handleToLayanan = () => navigate('/layanan');
+  const handleToKB = () => navigate('/kb');
+  const handleToPersalinan = () => navigate('/persalinan');
+  const handleToANC = () => navigate('/anc');
+  const handleToImunisasi = () => navigate('/imunisasi');
+  const handleToKunjunganPasien = () => navigate('/kunjungan-pasien');
+  const handleBackToDashboard = () => navigate('/dashboard');
+  const handleBackFromBuatJadwal = () => navigate(-1);
 
   const handleToVerifikasiOTP = (email) => {
     setResetEmail(email);
-    setCurrentPage('verifikasi-otp');
+    navigate('/verifikasi-otp');
   };
 
   const handleOTPVerified = (userData = null) => {
@@ -175,328 +122,423 @@ function App() {
         autoCloseDuration: 2000,
         onConfirm: () => {
           hideNotifikasi();
-          setCurrentPage('masuk');
+          navigate('/masuk');
         }
       });
     }
   };
 
   const handleToTambahPasien = () => {
-    setCurrentPage('data-pasien#tambahPasien');
+    navigate('/data-pasien#tambahPasien');
   };
 
   const handleToEditPasien = (pasienId) => {
     setSelectedPasienId(pasienId);
-    setCurrentPage('edit-pasien');
+    navigate('/edit-pasien');
   };
 
   const handleToTambahPengunjung = () => {
-    setCurrentPage('kunjungan-pasien#tambahPengunjung');
+    navigate('/kunjungan-pasien#tambahPengunjung');
   };
 
   const handleToBuatLaporan = () => {
-    setCurrentPage('laporan');
+    navigate('/laporan');
   };
 
-  const handleBackToDashboard = () => {
-    setCurrentPage('dashboard');
+  // Protected Route wrapper
+  const ProtectedRoute = ({ children }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/masuk" replace />;
+    }
+    return children;
+  };
+
+  // Public Route wrapper (redirect to dashboard if logged in)
+  const PublicRoute = ({ children }) => {
+    if (isLoggedIn) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return children;
   };
 
   return (
     <div className="App">
-      {!isLoggedIn && currentPage === 'buat-akun' && <BuatAkun onNavigate={handleNavigate} />}
-      {!isLoggedIn && currentPage === 'masuk' && <Masuk onNavigate={handleNavigate} onLogin={handleLogin} />}
-      {!isLoggedIn && currentPage === 'lupa-password' && <LupaPassword onBack={() => handleNavigate('masuk')} onLogin={() => handleNavigate('masuk')} onToVerifikasiOTP={handleToVerifikasiOTP} />}
-      {!isLoggedIn && currentPage === 'verifikasi-otp' && (
-        <VerifikasiOTP 
-          onBack={() => handleNavigate(otpData.usernameOrEmail ? 'masuk' : 'lupa-password')} 
-          onVerified={handleOTPVerified} 
-          email={otpData.email || resetEmail}
-          usernameOrEmail={otpData.usernameOrEmail}
-        />
-      )}
-      {isLoggedIn && currentPage === 'dashboard' && (
-        <Dashboard 
-          onLogout={handleLogout} 
-          userData={userData}
-          onToProfil={handleToProfil}
-          onToInformasiPengguna={handleToInformasiPengguna}
-          onToDataPasien={handleToDataPasien}
-          onToJadwal={handleToJadwal}
-          onToLaporan={handleToLaporan}
-          onToLayanan={handleToLayanan}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'profil' && (
-        <ProfilSaya 
-          onBack={handleBackToDashboard}
-          userData={userData}
-          onToUbahPassword={handleToUbahPassword}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'ubah-password' && (
-        <UbahPassword 
-          onBack={handleToProfil}
-        />
-      )}
-      {isLoggedIn && currentPage === 'informasi-pengguna' && (
-        <InformasiPengguna 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && (currentPage === 'data-pasien' || currentPage === 'data-pasien#tambahPasien') && (
-        <DataPasien 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToEditPasien={handleToEditPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'edit-pasien' && (
-        <EditPasien 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          pasienId={selectedPasienId}
-        />
-      )}
-      {isLoggedIn && currentPage === 'riwayat-data-masuk' && (
-        <RiwayatUbahDataPasien 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'riwayat-ubah-data' && (
-        <RiwayatUbahData 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'riwayat-masuk-akun' && (
-        <RiwayatMasukAkun 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'jadwal' && (
-        <Jadwal 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'buat-jadwal' && (
-        <BuatJadwal 
-          onBack={handleBackFromBuatJadwal}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToKunjunganPasien={handleToKunjunganPasien}
-        />
-      )}
-      {isLoggedIn && currentPage === 'laporan' && (
-        <Laporan 
-          onBack={handleBackToDashboard}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-        />
-      )}
-      {isLoggedIn && currentPage === 'layanan' && (
-        <DashboardLayanan 
-          onBack={handleBackToDashboard}
-          onToKB={handleToKB}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToImunisasi={handleToImunisasi}
-          onToKunjunganPasien={handleToKunjunganPasien}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-        />
-      )}
-      {isLoggedIn && currentPage === 'kb' && (
-        <LayananKB 
-          onBack={handleToLayanan}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToJadwal={handleToBuatJadwal}
-        />
-      )}
-      {isLoggedIn && currentPage === 'persalinan' && (
-        <LayananPersalinan 
-          onBack={handleToLayanan}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToJadwal={handleToBuatJadwal}
-        />
-      )}
-      {isLoggedIn && currentPage === 'anc' && (
-        <LayananANC 
-          onBack={handleToLayanan}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToJadwal={handleToBuatJadwal}
-        />
-      )}
-      {isLoggedIn && currentPage === 'imunisasi' && (
-        <LayananImunisasi 
-          onBack={handleToLayanan}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToJadwal={handleToBuatJadwal}
-        />
-      )}
-      {isLoggedIn && (currentPage === 'kunjungan-pasien' || currentPage === 'kunjungan-pasien#tambahPengunjung') && (
-        <LayananKunjunganPasien 
-          onBack={handleToLayanan}
-          userData={userData}
-          onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-          onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
-          onToProfil={handleToProfil}
-          onToTambahPasien={handleToTambahPasien}
-          onToTambahPengunjung={handleToTambahPengunjung}
-          onToBuatLaporan={handleToBuatLaporan}
-          onToPersalinan={handleToPersalinan}
-          onToANC={handleToANC}
-          onToKB={handleToKB}
-          onToImunisasi={handleToImunisasi}
-          onToJadwal={handleToBuatJadwal}
-        />
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            isLoggedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/masuk" replace />
+          } />
+        <Route path="/buat-akun" element={
+          <PublicRoute>
+            <BuatAkun onNavigate={handleNavigate} />
+          </PublicRoute>
+        } />
+        <Route path="/masuk" element={
+          <PublicRoute>
+            <Masuk onNavigate={handleNavigate} onLogin={handleLogin} />
+          </PublicRoute>
+        } />
+        <Route path="/lupa-password" element={
+          <PublicRoute>
+            <LupaPassword 
+              onBack={() => navigate('/masuk')} 
+              onLogin={() => navigate('/masuk')} 
+              onToVerifikasiOTP={handleToVerifikasiOTP} 
+            />
+          </PublicRoute>
+        } />
+        <Route path="/verifikasi-otp" element={
+          <PublicRoute>
+            <VerifikasiOTP 
+              onBack={() => navigate(otpData.usernameOrEmail ? '/masuk' : '/lupa-password')} 
+              onVerified={handleOTPVerified} 
+              email={otpData.email || resetEmail}
+              usernameOrEmail={otpData.usernameOrEmail}
+            />
+          </PublicRoute>
+        } />
+
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard 
+              onLogout={handleLogout} 
+              userData={userData}
+              onToProfil={handleToProfil}
+              onToInformasiPengguna={handleToInformasiPengguna}
+              onToDataPasien={handleToDataPasien}
+              onToJadwal={handleToJadwal}
+              onToLaporan={handleToLaporan}
+              onToLayanan={handleToLayanan}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/profil" element={
+          <ProtectedRoute>
+            <ProfilSaya 
+              onBack={handleBackToDashboard}
+              userData={userData}
+              onToUbahPassword={handleToUbahPassword}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/ubah-password" element={
+          <ProtectedRoute>
+            <UbahPassword 
+              onBack={handleToProfil}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/informasi-pengguna" element={
+          <ProtectedRoute>
+            <InformasiPengguna 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/data-pasien" element={
+          <ProtectedRoute>
+            <DataPasien 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToEditPasien={handleToEditPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/edit-pasien" element={
+          <ProtectedRoute>
+            <EditPasien 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              pasienId={selectedPasienId}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/riwayat-data-masuk" element={
+          <ProtectedRoute>
+            <RiwayatUbahDataPasien 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/riwayat-ubah-data" element={
+          <ProtectedRoute>
+            <RiwayatUbahData 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/riwayat-masuk-akun" element={
+          <ProtectedRoute>
+            <RiwayatMasukAkun 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/jadwal" element={
+          <ProtectedRoute>
+            <Jadwal 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/buat-jadwal" element={
+          <ProtectedRoute>
+            <BuatJadwal 
+              onBack={handleBackFromBuatJadwal}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToKunjunganPasien={handleToKunjunganPasien}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/laporan" element={
+          <ProtectedRoute>
+            <Laporan 
+              onBack={handleBackToDashboard}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/layanan" element={
+          <ProtectedRoute>
+            <DashboardLayanan 
+              onBack={handleBackToDashboard}
+              onToKB={handleToKB}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToImunisasi={handleToImunisasi}
+              onToKunjunganPasien={handleToKunjunganPasien}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/kb" element={
+          <ProtectedRoute>
+            <LayananKB 
+              onBack={handleToLayanan}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToJadwal={handleToBuatJadwal}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/persalinan" element={
+          <ProtectedRoute>
+            <LayananPersalinan 
+              onBack={handleToLayanan}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToJadwal={handleToBuatJadwal}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/anc" element={
+          <ProtectedRoute>
+            <LayananANC 
+              onBack={handleToLayanan}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToJadwal={handleToBuatJadwal}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/imunisasi" element={
+          <ProtectedRoute>
+            <LayananImunisasi 
+              onBack={handleToLayanan}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToJadwal={handleToBuatJadwal}
+            />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/kunjungan-pasien" element={
+          <ProtectedRoute>
+            <LayananKunjunganPasien 
+              onBack={handleToLayanan}
+              userData={userData}
+              onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+              onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+              onToProfil={handleToProfil}
+              onToTambahPasien={handleToTambahPasien}
+              onToTambahPengunjung={handleToTambahPengunjung}
+              onToBuatLaporan={handleToBuatLaporan}
+              onToPersalinan={handleToPersalinan}
+              onToANC={handleToANC}
+              onToKB={handleToKB}
+              onToImunisasi={handleToImunisasi}
+              onToJadwal={handleToBuatJadwal}
+            />
+          </ProtectedRoute>
+        } />
+      </Routes>
       )}
       
       {/* Komponen Notifikasi Global */}

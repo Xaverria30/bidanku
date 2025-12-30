@@ -1,20 +1,25 @@
+/**
+ * Service Persalinan
+ * Menangani semua operasi database terkait persalinan
+ */
+
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const auditService = require('./audit.service');
 
 /**
- * Helper function to convert date formats
- * Converts DD/MM/YYYY to YYYY-MM-DD for database
+ * Helper: Konversi format tanggal
+ * Mengubah dari DD/MM/YYYY ke YYYY-MM-DD untuk database
  */
 const convertDate = (dateStr) => {
   if (!dateStr) return null;
 
-  // Already in YYYY-MM-DD format
+  // Sudah dalam format YYYY-MM-DD
   if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
     return dateStr;
   }
 
-  // Convert DD/MM/YYYY to YYYY-MM-DD
+  // Konversi dari DD/MM/YYYY ke YYYY-MM-DD
   if (dateStr.includes('/')) {
     const parts = dateStr.split('/');
     if (parts.length === 3) {
@@ -27,7 +32,11 @@ const convertDate = (dateStr) => {
 };
 
 /**
- * Create new delivery registration
+ * Buat registrasi persalinan baru
+ * Menggunakan transaksi untuk integritas data
+ * @param {Object} data - Data dari frontend
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Data registrasi yang dibuat
  */
 const createRegistrasiPersalinan = async (data, userId) => {
   const {
@@ -46,12 +55,17 @@ const createRegistrasiPersalinan = async (data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Check if patient exists, create or update
+    // 1. Cek pasien (ibu), buat baru atau update
     let id_pasien;
-    const [existingPasien] = await connection.query(
-      'SELECT id_pasien FROM pasien WHERE nik = ?',
-      [nik_istri]
-    );
+    let existingPasien = [];
+
+    // Hanya cek NIK jika ada dan valid
+    if (nik_istri && nik_istri.trim().length > 0) {
+      [existingPasien] = await connection.query(
+        'SELECT id_pasien FROM pasien WHERE nik = ?',
+        [nik_istri]
+      );
+    }
 
     if (existingPasien.length > 0) {
       id_pasien = existingPasien[0].id_pasien;
@@ -63,17 +77,17 @@ const createRegistrasiPersalinan = async (data, userId) => {
       id_pasien = uuidv4();
       await connection.query(
         'INSERT INTO pasien (id_pasien, nama, nik, umur, alamat, no_hp) VALUES (?, ?, ?, ?, ?, ?)',
-        [id_pasien, nama_istri, nik_istri, umur_istri, alamat, no_hp || null]
+        [id_pasien, nama_istri, nik_istri || null, umur_istri, alamat, no_hp || null]
       );
     }
 
-    // 2. Create examination record
+    // 2. Buat record pemeriksaan
     const id_pemeriksaan = uuidv4();
 
-    // Subjektif & Objektif for SOAP completeness (optional duplicates for display)
+    // Subjektif & Objektif untuk kelengkapan SOAP (opsional duplikat untuk tampilan)
     const subjektif_final = `Persalinan Anak Ke-${anak_ke || '-'}, Jenis Partus: ${jenis_partus || '-'}`;
 
-    // Updated Objektif: Still useful to keep a summary string for quick viewing in SOAP history
+    // Update Objektif: Tetap berguna untuk menyimpan string ringkasan untuk tampilan cepat di riwayat SOAP
     const objektif_final = `Ibu - TD: ${td_ibu || '-'} mmHg, BB: ${bb_ibu || '-'} kg, LILA: ${lila_ibu || '-'} cm | Bayi - BB: ${bb_bayi || '-'} gram, PB: ${pb_bayi || '-'} cm`;
 
     const tatalaksana_final = `Penolong: ${penolong || '-'}, IMD: ${imd_dilakukan ? 'Ya' : 'Tidak'}`;
@@ -84,7 +98,7 @@ const createRegistrasiPersalinan = async (data, userId) => {
       [id_pemeriksaan, id_pasien, tanggalConverted, subjektif_final, objektif_final, tatalaksana_final]
     );
 
-    // 3. Create persalinan record
+    // 3. Buat record persalinan
     const id_persalinan = uuidv4();
     await connection.query(
       `INSERT INTO layanan_persalinan (
@@ -120,7 +134,9 @@ const createRegistrasiPersalinan = async (data, userId) => {
 };
 
 /**
- * Get delivery record by ID
+ * Ambil data persalinan berdasarkan ID
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @returns {Object} Data Persalinan lengkap
  */
 const getPersalinanById = async (id_pemeriksaan) => {
   const query = `
@@ -162,7 +178,7 @@ const getPersalinanById = async (id_pemeriksaan) => {
   const [rows] = await db.query(query, [id_pemeriksaan]);
 
   if (rows[0]) {
-    // If td_ibu/bb_ibu are null (legacy data), try to extract from objektif text
+    // Jika td_ibu/bb_ibu masih kosong (data lama), coba ekstrak dari teks objektif
     if (!rows[0].td_ibu) {
       const objektif = rows[0].objektif || '';
       const tdMatch = objektif.match(/TD:\s*([^\s,]+)/);
@@ -180,7 +196,9 @@ const getPersalinanById = async (id_pemeriksaan) => {
 };
 
 /**
- * Get all delivery records
+ * Ambil daftar semua persalinan
+ * @param {string} search - Kata kunci pencarian
+ * @returns {Array} Daftar persalinan
  */
 const getAllPersalinan = async (search = '') => {
   let query = `
@@ -215,7 +233,11 @@ const getAllPersalinan = async (search = '') => {
 };
 
 /**
- * Update delivery registration
+ * Update registrasi persalinan
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {Object} data - Data update
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Data terbaru
  */
 const updateRegistrasiPersalinan = async (id_pemeriksaan, data, userId) => {
   const {
@@ -234,7 +256,7 @@ const updateRegistrasiPersalinan = async (id_pemeriksaan, data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // Get existing pemeriksaan
+    // Cek pemeriksaan yang ada
     const [existingPemeriksaan] = await connection.query(
       'SELECT id_pasien FROM pemeriksaan WHERE id_pemeriksaan = ?',
       [id_pemeriksaan]
@@ -246,7 +268,7 @@ const updateRegistrasiPersalinan = async (id_pemeriksaan, data, userId) => {
 
     const id_pasien = existingPemeriksaan[0].id_pasien;
 
-    // Update patient data
+    // Update data pasien
     await connection.query(
       'UPDATE pasien SET nama = ?, nik = ?, umur = ?, alamat = ?, no_hp = ? WHERE id_pasien = ?',
       [nama_istri, nik_istri, umur_istri, alamat, no_hp || null, id_pasien]
@@ -311,7 +333,9 @@ const updateRegistrasiPersalinan = async (id_pemeriksaan, data, userId) => {
 };
 
 /**
- * Delete delivery registration
+ * Hapus registrasi persalinan
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {string} userId - ID Pengguna
  */
 const deleteRegistrasiPersalinan = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();

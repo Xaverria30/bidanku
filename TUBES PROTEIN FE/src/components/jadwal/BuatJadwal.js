@@ -4,6 +4,8 @@ import './BuatJadwal.css';
 import pinkLogo from '../../assets/images/pink-logo.png';
 import jadwalService from '../../services/jadwal.service';
 import pasienService from '../../services/pasien.service';
+import Notifikasi from '../notifikasi/NotifikasiComponent';
+import { useNotifikasi } from '../notifikasi/useNotifikasi';
 
 function BuatJadwal({ 
   onBack, 
@@ -21,6 +23,7 @@ function BuatJadwal({
   editData = null
 }) {
   const userData = JSON.parse(localStorage.getItem('userData'));
+  const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
   const [pasienList, setPasienList] = useState([]);
   const [formData, setFormData] = useState({
     id_pasien: '',
@@ -74,7 +77,11 @@ function BuatJadwal({
     try {
       // Validate
       if (!formData.id_pasien || !formData.jenis_layanan || !formData.tanggal || !formData.jam_mulai) {
-        alert('Mohon lengkapi: Pasien, Layanan, Tanggal, Jam Mulai');
+        showNotifikasi({
+          type: 'error',
+          message: 'Mohon lengkapi: Pasien, Layanan, Tanggal, Jam Mulai',
+          onConfirm: hideNotifikasi
+        });
         return;
       }
 
@@ -96,14 +103,30 @@ function BuatJadwal({
       }
 
       if (response.success) {
-        alert(editData ? 'Jadwal berhasil diupdate!' : 'Jadwal berhasil dibuat!');
-        onBack();
+        showNotifikasi({
+          type: 'success',
+          message: editData ? 'Jadwal berhasil diupdate!' : 'Jadwal berhasil dibuat!',
+          autoClose: true,
+          autoCloseDuration: 2000,
+          onConfirm: () => {
+            hideNotifikasi();
+            onBack();
+          }
+        });
       } else {
-        alert(response.message || 'Gagal menyimpan jadwal');
+        showNotifikasi({
+          type: 'error',
+          message: response.message || 'Gagal menyimpan jadwal',
+          onConfirm: hideNotifikasi
+        });
       }
     } catch (error) {
       console.error('Error saving jadwal:', error);
-      alert(error.message || 'Terjadi kesalahan saat menyimpan jadwal');
+      showNotifikasi({
+        type: 'error',
+        message: error.message || 'Terjadi kesalahan saat menyimpan jadwal',
+        onConfirm: hideNotifikasi
+      });
     }
   };
 
@@ -245,6 +268,20 @@ function BuatJadwal({
           </div>
         </main>
       </div>
+      
+      {/* Komponen Notifikasi */}
+      <Notifikasi
+        show={notifikasi.show}
+        type={notifikasi.type}
+        message={notifikasi.message}
+        detail={notifikasi.detail}
+        onConfirm={notifikasi.onConfirm}
+        onCancel={notifikasi.onCancel}
+        confirmText={notifikasi.confirmText}
+        cancelText={notifikasi.cancelText}
+        autoClose={notifikasi.autoClose}
+        autoCloseDuration={notifikasi.autoCloseDuration}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../shared/Sidebar';
 import './RiwayatUbahData.css';
+import pinkLogo from '../../assets/images/pink-logo.png';
 import auditService from '../../services/audit.service';
 
 function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi }) {
@@ -133,13 +134,9 @@ function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, o
       {/* Header */}
       <div className="rud-header">
         <div className="rud-header-left">
-          {/* SVG Logo */}
-          <svg className="rud-header-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="45" fill="#E89AC7"/>
-            <path d="M50 35 C45 35, 40 40, 40 45 C40 55, 50 65, 50 70 C50 65, 60 55, 60 45 C60 40, 55 35, 50 35 Z" fill="white"/>
-            <circle cx="35" cy="65" r="8" fill="white" opacity="0.8"/>
-            <circle cx="65" cy="65" r="8" fill="white" opacity="0.8"/>
-          </svg>
+          <div className="rud-header-icon">
+            <img src={pinkLogo} alt="Pink Logo" className="rud-header-logo-img" />
+          </div>
           <h1 className="rud-header-title">Riwayat Ubah Data</h1>
         </div>
         <button className="btn-kembali-rud" onClick={onBack}>Kembali</button>

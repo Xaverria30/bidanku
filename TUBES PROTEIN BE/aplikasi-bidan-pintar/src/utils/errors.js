@@ -1,10 +1,10 @@
 /**
- * Custom Error Classes
- * Standardized error handling across the application
+ * Kelas Error Kustom
+ * Penanganan error standar di seluruh aplikasi
  */
 
 /**
- * Base Application Error
+ * Error Aplikasi Dasar
  */
 class AppError extends Error {
   constructor(message, statusCode = 500) {
@@ -16,7 +16,7 @@ class AppError extends Error {
 }
 
 /**
- * Bad Request Error (400)
+ * Error Permintaan Tidak Valid (400)
  */
 class BadRequestError extends AppError {
   constructor(message = 'Permintaan tidak valid') {
@@ -25,7 +25,7 @@ class BadRequestError extends AppError {
 }
 
 /**
- * Unauthorized Error (401)
+ * Error Tidak Terotorisasi (401)
  */
 class UnauthorizedError extends AppError {
   constructor(message = 'Akses ditolak. Silakan login terlebih dahulu.') {
@@ -34,7 +34,7 @@ class UnauthorizedError extends AppError {
 }
 
 /**
- * Forbidden Error (403)
+ * Error Terlarang (403)
  */
 class ForbiddenError extends AppError {
   constructor(message = 'Akses ditolak. Anda tidak memiliki izin.') {
@@ -43,7 +43,7 @@ class ForbiddenError extends AppError {
 }
 
 /**
- * Not Found Error (404)
+ * Error Tidak Ditemukan (404)
  */
 class NotFoundError extends AppError {
   constructor(message = 'Data tidak ditemukan') {
@@ -52,7 +52,7 @@ class NotFoundError extends AppError {
 }
 
 /**
- * Conflict Error (409) - for duplicate entries
+ * Error Konflik (409) - untuk entri duplikat
  */
 class ConflictError extends AppError {
   constructor(message = 'Data sudah ada') {
@@ -61,7 +61,7 @@ class ConflictError extends AppError {
 }
 
 /**
- * Validation Error (400)
+ * Error Validasi (400)
  */
 class ValidationError extends AppError {
   constructor(message = 'Validasi gagal', errors = []) {

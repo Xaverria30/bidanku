@@ -141,13 +141,23 @@ function Notifikasi({
               <>
                 <button 
                   className="notifikasi-btn notifikasi-btn-cancel" 
-                  onClick={onCancel}
+                  onClick={() => {
+                    console.log('Tutup button clicked');
+                    if (onCancel) {
+                      onCancel();
+                    } else if (onConfirm) {
+                      onConfirm();
+                    }
+                  }}
                 >
                   {cancelText === 'Tidak' ? 'Tutup' : cancelText}
                 </button>
                 <button 
                   className="notifikasi-btn notifikasi-btn-confirm" 
-                  onClick={onConfirm}
+                  onClick={() => {
+                    console.log('Periksa button clicked');
+                    if (onConfirm) onConfirm();
+                  }}
                 >
                   {confirmText === 'Ya' ? 'Periksa' : confirmText}
                 </button>

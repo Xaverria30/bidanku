@@ -1,14 +1,14 @@
 /**
- * Request Validation Middleware
- * Uses Joi schemas for input validation
+ * Middleware Validasi Request
+ * Menggunakan skema Joi untuk validasi input
  */
 
 const { validationError } = require('../utils/response');
 
 /**
- * Validate request body against Joi schema
- * @param {Object} schema - Joi validation schema
- * @returns {Function} Express middleware
+ * Validasi body request berdasarkan skema Joi
+ * @param {Object} schema - Skema validasi Joi
+ * @returns {Function} Middleware Express
  */
 const validateBody = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.body, {
@@ -21,22 +21,22 @@ const validateBody = (schema) => (req, res, next) => {
       field: detail.context?.key || 'unknown',
       message: detail.message.replace(/"/g, '')
     }));
-    
+
     console.error('[VALIDATION_ERROR] Request body:', JSON.stringify(req.body, null, 2));
-    console.error('[VALIDATION_ERROR] Validation errors:', JSON.stringify(errors, null, 2));
+    console.error('[VALIDATION_ERROR] Error validasi:', JSON.stringify(errors, null, 2));
 
     return validationError(res, errors);
   }
 
-  // Replace body with validated/sanitized value
+  // Ganti body dengan nilai yang sudah divalidasi/disanitasi
   req.body = value;
   next();
 };
 
 /**
- * Validate request query parameters
- * @param {Object} schema - Joi validation schema
- * @returns {Function} Express middleware
+ * Validasi parameter query request
+ * @param {Object} schema - Skema validasi Joi
+ * @returns {Function} Middleware Express
  */
 const validateQuery = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.query, {
@@ -58,9 +58,9 @@ const validateQuery = (schema) => (req, res, next) => {
 };
 
 /**
- * Validate request params
- * @param {Object} schema - Joi validation schema
- * @returns {Function} Express middleware
+ * Validasi parameter route request (params)
+ * @param {Object} schema - Skema validasi Joi
+ * @returns {Function} Middleware Express
  */
 const validateParams = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.params, {
@@ -80,7 +80,7 @@ const validateParams = (schema) => (req, res, next) => {
   next();
 };
 
-// Default export for backward compatibility
+// Export default untuk kompatibilitas
 module.exports = validateBody;
 
 // Named exports

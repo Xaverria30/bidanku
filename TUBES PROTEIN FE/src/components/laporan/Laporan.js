@@ -4,157 +4,176 @@ import Sidebar from '../shared/Sidebar';
 import pinkLogo from '../../assets/images/pink-logo.png';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
-import laporanService from '../../services/laporan.service';
 
 function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi }) {
-  const [laporanList, setLaporanList] = useState([]);
-  const [filterBulan, setFilterBulan] = useState('');
-  const [filterTahun, setFilterTahun] = useState('');
+  // Ambil tanggal saat ini untuk default
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  const currentYear = today.getFullYear();
+
+  const [selectedLayanan, setSelectedLayanan] = useState('Semua');
+  const [selectedBulan, setSelectedBulan] = useState(currentMonth);
+  const [selectedTahun, setSelectedTahun] = useState(currentYear);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [dataLaporan, setDataLaporan] = useState([]);
+  const [summaryStats, setSummaryStats] = useState({
+    total_pasien: 0,
+    total_kunjungan: 0,
+    layanan_terbanyak: '-'
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
 
-  const fetchLaporan = async () => {
+  const layananOptions = [
+    { value: 'Semua', label: 'Semua Layanan' },
+    { value: 'ANC', label: 'Layanan ANC' },
+    { value: 'KB', label: 'Layanan KB' },
+    { value: 'Imunisasi', label: 'Layanan Imunisasi' },
+    { value: 'Persalinan', label: 'Layanan Persalinan' },
+    { value: 'Kunjungan Pasien', label: 'Kunjungan Pasien' }
+  ];
+
+  const bulanOptions = [
+    { value: 1, label: 'Januari' },
+    { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'Mei' },
+    { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' },
+    { value: 8, label: 'Agustus' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'Desember' }
+  ];
+
+  // Generate opsi tahun (tahun saat ini - 5 tahun ke belakang)
+  const tahunOptions = Array.from({ length: 6 }, (_, i) => {
+    const year = currentYear - i;
+    return { value: year, label: String(year) };
+  });
+
+  const fetchLaporanData = async () => {
+    setIsLoading(true);
     try {
-      // Fetch data dari API
-      const data = await laporanService.getLaporanList();
-      setLaporanList(data);
+      const token = localStorage.getItem('token');
+      const queryParams = new URLSearchParams({
+        bulan: selectedBulan,
+        tahun: selectedTahun,
+        jenis_layanan: selectedLayanan === 'Semua' ? '' : selectedLayanan
+      });
+
+      const response = await fetch(`http://localhost:5000/api/laporan/summary?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setDataLaporan(result.data.data);
+        setSummaryStats(result.data.stats);
+      } else {
+        throw new Error(result.message);
+      }
     } catch (error) {
-      console.error('Error fetching laporan:', error);
+      console.error('Error loading data:', error);
       showNotifikasi({
         type: 'error',
         message: 'Gagal memuat data laporan',
-        onConfirm: hideNotifikasi,
-        onCancel: hideNotifikasi
-      });
-    }
-  };
-
-  // Load data laporan
-  useEffect(() => {
-    fetchLaporan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleFilter = async () => {
-    if (!filterBulan || !filterTahun) {
-      showNotifikasi({
-        type: 'error',
-        message: 'Bulan dan Tahun harus dipilih',
-        onConfirm: hideNotifikasi,
-        onCancel: hideNotifikasi
-      });
-      return;
-    }
-    
-    setIsDownloading(true);
-    try {
-      // Generate Excel dari API backend
-      await laporanService.downloadLaporanBulanan(
-        parseInt(filterBulan), 
-        parseInt(filterTahun)
-      );
-      
-      showNotifikasi({
-        type: 'success',
-        message: `Laporan Excel untuk bulan ${filterBulan}/${filterTahun} berhasil didownload!`,
-        autoClose: true,
-        autoCloseDuration: 2000,
         onConfirm: hideNotifikasi
-      });
-    } catch (error) {
-      console.error('Error generating laporan:', error);
-      showNotifikasi({
-        type: 'error',
-        message: error.message || 'Gagal generate laporan. Pastikan koneksi internet dan data tersedia.',
-        onConfirm: hideNotifikasi,
-        onCancel: hideNotifikasi
       });
     } finally {
-      setIsDownloading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleDownload = async () => {
-    // Export data list yang ditampilkan saat ini ke Excel (client-side)
-    if (laporanList.length === 0) {
+  // Auto-load saat dipasang dan saat filter berubah
+  useEffect(() => {
+    fetchLaporanData();
+  }, [selectedBulan, selectedTahun, selectedLayanan]);
+
+  const handleDownloadExcel = () => {
+    if (dataLaporan.length === 0) {
       showNotifikasi({
         type: 'error',
-        message: 'Tidak ada data untuk di-export',
-        onConfirm: hideNotifikasi,
-        onCancel: hideNotifikasi
+        message: 'Tidak ada data untuk didownload',
+        onConfirm: hideNotifikasi
       });
       return;
     }
-    
-    try {
-      // Format data untuk export
-      const dataToExport = laporanList.map((laporan, index) => ({
-        'No': index + 1,
-        'Label': laporan.label,
-        'Jenis Layanan': laporan.jenis_layanan,
-        'Periode': laporan.periode,
-        'Tanggal Dibuat': laporan.tanggal_dibuat,
-        'Jumlah Pasien': laporan.jumlah_pasien,
-        'Jumlah Kunjungan': laporan.jumlah_kunjungan
-      }));
-      
-      const filename = `Laporan_List_${new Date().toISOString().split('T')[0]}.xlsx`;
-      laporanService.exportToExcel(dataToExport, filename);
-      
-      showNotifikasi({
-        type: 'success',
-        message: 'Data laporan berhasil di-export ke Excel!',
-        autoClose: true,
-        autoCloseDuration: 2000,
-        onConfirm: hideNotifikasi
+
+    const token = localStorage.getItem('token');
+    const queryParams = new URLSearchParams({
+      format: 'excel',
+      bulan: selectedBulan,
+      tahun: selectedTahun
+    });
+
+    // Tentukan nama file yang disederhanakan
+    const filename = `Laporan_${selectedBulan}_${selectedTahun}.xlsx`;
+
+    // Lakukan download
+    fetch(`http://localhost:5000/api/laporan/export?${queryParams}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Download failed');
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showNotifikasi({
+          type: 'success',
+          message: 'Laporan berhasil didownload',
+          autoClose: true,
+          onConfirm: hideNotifikasi
+        });
+      })
+      .catch(error => {
+        console.error('Download error:', error);
+        showNotifikasi({
+          type: 'error',
+          message: 'Gagal mendownload laporan',
+          onConfirm: hideNotifikasi
+        });
       });
-    } catch (error) {
-      console.error('Error exporting laporan:', error);
-      showNotifikasi({
-        type: 'error',
-        message: 'Gagal export data ke Excel',
-        onConfirm: hideNotifikasi,
-        onCancel: hideNotifikasi
-      });
-    }
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleSearch = () => {
-    // Filter data berdasarkan search query (untuk mock data list)
-    if (searchQuery.trim() === '') {
-      fetchLaporan();
-    } else {
-      const filtered = laporanList.filter(laporan => 
-        laporan.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        laporan.jenis_layanan.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        laporan.periode.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setLaporanList(filtered);
-    }
-  };
+  // Filter di sisi klien berdasarkan query pencarian
+  const filteredData = dataLaporan.filter(item =>
+    item.nama_pasien.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.jenis_layanan.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="laporan-page">
-      {/* Header */}
       <div className="laporan-header">
         <div className="laporan-header-left">
           <div className="laporan-header-logo">
             <img src={pinkLogo} alt="Pink Logo" className="laporan-header-logo-img" />
           </div>
-          <h1 className="laporan-header-title">Laporan</h1>
+          <h1 className="laporan-header-title">Laporan Bulanan</h1>
         </div>
         <button className="btn-kembali-laporan" onClick={onBack}>Kembali</button>
       </div>
 
-      {/* Main Content */}
       <div className="laporan-content">
-        {/* Sidebar */}
-        <Sidebar 
+        <Sidebar
           activePage="laporan"
           onRiwayatDataMasuk={onToRiwayatDataMasuk}
           onRiwayatMasukAkun={onToRiwayatMasukAkun}
@@ -168,118 +187,131 @@ function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfi
           onToImunisasi={onToImunisasi}
         />
 
-        {/* Main Area */}
         <main className="laporan-main-area">
-          {/* Filter Section */}
-          <div className="laporan-filter-section">
-            <div className="laporan-filter-group">
-              <div className="laporan-filter-item">
-                <label>Bulan *</label>
-                <select 
-                  value={filterBulan} 
-                  onChange={(e) => setFilterBulan(e.target.value)}
-                  required
-                >
-                  <option value="">Pilih Bulan</option>
-                  <option value="1">Januari</option>
-                  <option value="2">Februari</option>
-                  <option value="3">Maret</option>
-                  <option value="4">April</option>
-                  <option value="5">Mei</option>
-                  <option value="6">Juni</option>
-                  <option value="7">Juli</option>
-                  <option value="8">Agustus</option>
-                  <option value="9">September</option>
-                  <option value="10">Oktober</option>
-                  <option value="11">November</option>
-                  <option value="12">Desember</option>
-                </select>
-              </div>
-
-              <div className="laporan-filter-item">
-                <label>Tahun *</label>
-                <select 
-                  value={filterTahun} 
-                  onChange={(e) => setFilterTahun(e.target.value)}
-                  required
-                >
-                  <option value="">Pilih Tahun</option>
-                  <option value="2023">2023</option>
-                  <option value="2024">2024</option>
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
-                </select>
-              </div>
-
-              <button 
-                className="btn-filter-laporan" 
-                onClick={handleFilter}
-                disabled={isDownloading}
-              >
-                {isDownloading ? 'Mengunduh...' : 'Generate Excel'}
-              </button>
+          {/* Dashboard Cards Section */}
+          <div className="dashboard-cards">
+            <div className="dashboard-card card-pink">
+              <div className="card-title">Total Pasien</div>
+              <div className="card-value">{summaryStats.total_pasien}</div>
+              <div className="card-desc">Orang</div>
+            </div>
+            <div className="dashboard-card card-purple">
+              <div className="card-title">Total Kunjungan</div>
+              <div className="card-value">{summaryStats.total_kunjungan}</div>
+              <div className="card-desc">Kali</div>
+            </div>
+            <div className="dashboard-card card-blue">
+              <div className="card-title">Layanan Terbanyak</div>
+              <div className="card-value small">{summaryStats.layanan_terbanyak}</div>
+              <div className="card-desc">Bulan Ini</div>
             </div>
           </div>
 
-          {/* Search and Download Section */}
+          <div className="laporan-filter-section">
+            <div className="filter-tabs">
+              <div className="filter-group">
+                <label>Filter Bulan:</label>
+                <select
+                  value={selectedBulan}
+                  onChange={(e) => setSelectedBulan(Number(e.target.value))}
+                  className="filter-select"
+                >
+                  {bulanOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedTahun}
+                  onChange={(e) => setSelectedTahun(Number(e.target.value))}
+                  className="filter-select"
+                >
+                  {tahunOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label>Jenis Layanan:</label>
+                <select
+                  value={selectedLayanan}
+                  onChange={(e) => setSelectedLayanan(e.target.value)}
+                  className="filter-select"
+                >
+                  {layananOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div className="laporan-search-section">
-            <div className="search-input-wrapper">
+            <div className="search-box">
               <input
                 type="text"
-                className="laporan-search-input"
-                placeholder="Cari Data"
+                placeholder="Cari Nama Pasien / Layanan..."
                 value={searchQuery}
-                onChange={handleSearchChange}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
               />
-              <button className="btn-search-laporan" onClick={handleSearch}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                  <path d="M9 3.5C5.686 3.5 3 6.186 3 9.5C3 12.814 5.686 15.5 9 15.5C10.386 15.5 11.678 15.013 12.707 14.207L16.293 17.793C16.488 17.988 16.744 18.085 17 18.085C17.256 18.085 17.512 17.988 17.707 17.793C18.098 17.402 18.098 16.768 17.707 16.377L14.121 12.791C14.957 11.752 15.5 10.435 15.5 9C15.5 5.686 12.814 3 9.5 3C9.333 3 9.167 3.006 9 3.018V3.5ZM9 5C11.761 5 14 7.239 14 10C14 12.761 11.761 15 9 15C6.239 15 4 12.761 4 10C4 7.239 6.239 5 9 5Z"/>
-                </svg>
-              </button>
             </div>
-
-            <button className="btn-download-laporan" onClick={handleDownload} title="Download Excel Laporan">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                <path d="M10 2V12M10 12L6 8M10 12L14 8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 14V16C4 17.1046 4.89543 18 6 18H14C15.1046 18 16 17.1046 16 16V14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+            <button
+              className="btn-download-excel"
+              onClick={handleDownloadExcel}
+              title="Download Excel"
+            >
+              Export Excel
             </button>
           </div>
 
-          {/* Laporan List Card */}
-          <div className="laporan-list-card">
-            <div className="laporan-list-inner">
-              {laporanList.length > 0 ? (
-                <>
-                  {laporanList.map((laporan) => (
-                    <div key={laporan.id_laporan} className="laporan-item">
-                      <span className="laporan-item-text">{laporan.label}</span>
-                    </div>
-                  ))}
-                </>
-              ) : (
-                <div className="laporan-empty-state">
-                  Data tidak ditemukan. Harap lakukan filtering terlebih dahulu.
-                </div>
-              )}
-            </div>
+          <div className="laporan-data-section">
+            {isLoading ? (
+              <div className="loading-state">Memuat data...</div>
+            ) : filteredData.length === 0 ? (
+              <div className="no-data-message">
+                <p>Tidak ada data ditemukan untuk periode {bulanOptions[selectedBulan - 1].label} {selectedTahun}.</p>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="laporan-table">
+                  <thead>
+                    <tr>
+                      <th>NO</th>
+                      <th>TANGGAL</th>
+                      <th>NAMA PASIEN</th>
+                      <th>JENIS LAYANAN</th>
+                      <th>DIAGNOSA/ANALISA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((item, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                        <td><strong>{item.nama_pasien}</strong></td>
+                        <td>
+                          <span className="service-badge">
+                            {item.jenis_layanan}
+                          </span>
+                        </td>
+                        <td>{item.analisa || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </main>
       </div>
-      
-      {/* Komponen Notifikasi */}
+
       <Notifikasi
         show={notifikasi.show}
         type={notifikasi.type}
         message={notifikasi.message}
-        detail={notifikasi.detail}
         onConfirm={notifikasi.onConfirm}
-        onCancel={notifikasi.onCancel}
-        confirmText={notifikasi.confirmText}
-        cancelText={notifikasi.cancelText}
         autoClose={notifikasi.autoClose}
-        autoCloseDuration={notifikasi.autoCloseDuration}
       />
     </div>
   );

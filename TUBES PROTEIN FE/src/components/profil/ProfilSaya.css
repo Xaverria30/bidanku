@@ -7,6 +7,9 @@
 
 /* ===== Header ===== */
 .profil-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   background: white;
   border: 1px solid #E89AC7;
   margin: 20px;

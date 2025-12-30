@@ -4,6 +4,8 @@ import './EditPasien.css';
 import pinkLogo from '../../assets/images/pink-logo.png';
 import pasienService from '../../services/pasien.service';
 import * as layananService from '../../services/layanan.service';
+import Notifikasi from '../notifikasi/NotifikasiComponent';
+import { useNotifikasi } from '../notifikasi/useNotifikasi';
 
 function EditPasien({ 
   onBack, 
@@ -27,6 +29,7 @@ function EditPasien({
     alamat: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
   const [historiLayanan, setHistoriLayanan] = useState({
     kb: [],
     anc: [],
@@ -59,7 +62,11 @@ function EditPasien({
       }
     } catch (error) {
       console.error('Error fetching pasien:', error);
-      alert('Gagal mengambil data pasien');
+      showNotifikasi({
+        type: 'error',
+        message: 'Gagal mengambil data pasien',
+        onConfirm: hideNotifikasi
+      });
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +127,11 @@ function EditPasien({
     try {
       // Validate
       if (!formData.nama || !formData.umur || !formData.nik || !formData.no_hp || !formData.alamat) {
-        alert('Mohon lengkapi semua field');
+        showNotifikasi({
+          type: 'error',
+          message: 'Mohon lengkapi semua field',
+          onConfirm: hideNotifikasi
+        });
         return;
       }
 
@@ -137,14 +148,30 @@ function EditPasien({
       const response = await pasienService.updatePasien(pasienId, payload);
 
       if (response.success) {
-        alert('Data pasien berhasil diupdate!');
-        onBack();
+        showNotifikasi({
+          type: 'success',
+          message: 'Data pasien berhasil diupdate!',
+          autoClose: true,
+          autoCloseDuration: 2000,
+          onConfirm: () => {
+            hideNotifikasi();
+            onBack();
+          }
+        });
       } else {
-        alert(response.message || 'Gagal mengupdate data pasien');
+        showNotifikasi({
+          type: 'error',
+          message: response.message || 'Gagal mengupdate data pasien',
+          onConfirm: hideNotifikasi
+        });
       }
     } catch (error) {
       console.error('Error updating pasien:', error);
-      alert('Terjadi kesalahan saat mengupdate data pasien');
+      showNotifikasi({
+        type: 'error',
+        message: 'Terjadi kesalahan saat mengupdate data pasien',
+        onConfirm: hideNotifikasi
+      });
     } finally {
       setIsLoading(false);
     }
@@ -383,6 +410,20 @@ function EditPasien({
           )}
         </main>
       </div>
+      
+      {/* Komponen Notifikasi */}
+      <Notifikasi
+        show={notifikasi.show}
+        type={notifikasi.type}
+        message={notifikasi.message}
+        detail={notifikasi.detail}
+        onConfirm={notifikasi.onConfirm}
+        onCancel={notifikasi.onCancel}
+        confirmText={notifikasi.confirmText}
+        cancelText={notifikasi.cancelText}
+        autoClose={notifikasi.autoClose}
+        autoCloseDuration={notifikasi.autoCloseDuration}
+      />
     </div>
   );
 }

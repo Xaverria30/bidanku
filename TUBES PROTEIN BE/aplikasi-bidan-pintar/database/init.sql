@@ -79,7 +79,7 @@ CREATE TABLE pasien (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    INDEX idx_nik (nik),
+    UNIQUE INDEX idx_nik_unique (nik),
     INDEX idx_nama (nama)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -363,7 +363,12 @@ INSERT INTO pasien (id_pasien, nama, nik, umur, alamat, no_hp) VALUES
 ('660e8400-e29b-41d4-a716-446655440007', 'Putri Ayu Lestari', '3201234567890007', 29, 'Jl. Pahlawan No. 67, Medan', '081234567896'),
 ('660e8400-e29b-41d4-a716-446655440008', 'Wulan Sari', '3201234567890008', 24, 'Jl. Veteran No. 89, Makassar', '081234567897'),
 ('660e8400-e29b-41d4-a716-446655440009', 'Dian Permatasari', '3201234567890009', 31, 'Jl. Pemuda No. 34, Palembang', '081234567898'),
-('660e8400-e29b-41d4-a716-446655440010', 'Nurul Hidayah', '3201234567890010', 26, 'Jl. Kartini No. 15, Denpasar', '081234567899');
+('660e8400-e29b-41d4-a716-446655440010', 'Nurul Hidayah', '3201234567890010', 26, 'Jl. Kartini No. 15, Denpasar', '081234567899'),
+('660e8400-e29b-41d4-a716-446655440011', 'Siti Aminah', '3273111111900011', 34, 'Jl. Asia Afrika No. 11, Bandung', '081234567900'),
+('660e8400-e29b-41d4-a716-446655440012', 'Bunga Citra', '3171121212950012', 29, 'Jl. Thamrin No. 22, Jakarta', '081234567901'),
+('660e8400-e29b-41d4-a716-446655440013', 'Dewi Persik', '3578131313930013', 31, 'Jl. Tunjungan No. 44, Surabaya', '081234567902'),
+('660e8400-e29b-41d4-a716-446655440014', 'Agnes Monica', '3374141414920014', 32, 'Jl. Pandanaran No. 55, Semarang', '081234567903'),
+('660e8400-e29b-41d4-a716-446655440015', 'Raisa Andriana', '3471151515900015', 33, 'Jl. Malioboro No. 99, Yogyakarta', '081234567904');
 
 -- =============================================================================
 -- SAMPLE DATA: Jadwal
@@ -452,28 +457,73 @@ INSERT INTO pemeriksaan (id_pemeriksaan, id_pasien, jenis_layanan, subjektif, ob
  'BB: 6.8 kg, TD: -',
  'Dermatitis popok',
  'Terapi: Salep zinc oxide, ganti popok lebih sering, jaga kebersihan.',
- '2025-12-13 09:30:00');
+ '2025-12-13 09:30:00'),
+
+-- MULTI-VISIT PATIENT: Kartini Wijaya (0001) - ANC Follow Up
+('880e8400-e29b-41d4-a716-446655440013', '660e8400-e29b-41d4-a716-446655440001', 'ANC',
+ 'Kontrol ANC 2 minggu. Ibu merasa gerak janin aktif.',
+ 'TD: 110/70 mmHg, BB: 58.5 kg (naik 0.5kg). DJJ: 142x/menit.',
+ 'Kehamilan normal G1P0A0 UK 30 minggu',
+ 'Lanjutkan tablet Fe. Senam hamil.',
+ '2025-12-15 08:00:00'),
+
+-- INTEGRATED HISTORY: Fitri Handayani (0004) - KB Post Partum
+('880e8400-e29b-41d4-a716-446655440011', '660e8400-e29b-41d4-a716-446655440004', 'KB',
+ 'Kontrol KB Ulang. Tidak ada keluhan.',
+ 'TD: 110/70 mmHg, BB: 62 kg. Luka suntikan baik.',
+ 'Akseptor KB Implant aktif',
+ 'Konseling gizi ibu menyusui.',
+ '2025-12-20 09:00:00'),
+
+-- INTEGRATED HISTORY: Fitri Handayani (0004) - Imunisasi Bayi
+('880e8400-e29b-41d4-a716-446655440012', '660e8400-e29b-41d4-a716-446655440004', 'Imunisasi',
+ 'Imunisasi dasar bayi usia 1 bulan. Bayi bugar.',
+ 'Suhu: 36.5C, BB: 4.2 kg (naik dari lahir 3.2kg).',
+ 'Bayi sehat, tumbuh kembang baik',
+ 'Imunisasi BCG dan Polio 1 diberikan.',
+ '2025-12-22 08:30:00'),
+
+-- NEW PATIENT: Siti Aminah (0011) - ANC
+('880e8400-e29b-41d4-a716-446655440014', '660e8400-e29b-41d4-a716-446655440011', 'ANC',
+ 'Kunjungan K1. Mual muntah hebat pagi hari.',
+ 'TD: 100/60 mmHg, BB: 50 kg.',
+ 'G3P2A0 UK 14 minggu dengan Hiperemesis Gravidarum Grade I',
+ 'Rehidrasi oral, Ondansetron, makan porsi kecil.',
+ '2025-12-15 10:00:00'),
+
+-- NEW PATIENT: Bunga Citra (0012) - KB
+('880e8400-e29b-41d4-a716-446655440015', '660e8400-e29b-41d4-a716-446655440012', 'KB',
+ 'Ingin pasang KB setelah melahirkan 40 hari lalu.',
+ 'TD: 120/80 mmHg, BB: 65 kg. Uterus involusi baik.',
+ 'Calon akseptor IUD',
+ 'Pemasangan IUD Copper T.',
+ '2025-12-18 11:00:00');
 
 -- =============================================================================
 -- SAMPLE DATA: Layanan KB
 -- =============================================================================
 INSERT INTO layanan_kb (id_kb, id_pemeriksaan, nomor_registrasi_lama, nomor_registrasi_baru, metode, td_ibu, bb_ibu, nama_ayah, nik_ayah, umur_ayah, td_ayah, bb_ayah, kunjungan_ulang, catatan) VALUES
 ('990e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440003', 'KB-2024-001', 'KB-2025-001', 'Suntik KB', '120/80', 55.00, 'Ahmad Hidayat', '3201234567890102', 35, '130/85', 70.00, '2026-03-03', 'Akseptor aktif sejak 2022'),
-('990e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440004', NULL, 'KB-2025-002', 'IUD', '115/75', 60.00, 'Budi Santoso', '3201234567890106', 38, '125/80', 75.00, '2026-01-07', 'Konseling pergantian metode dari pil ke IUD');
+('990e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440004', NULL, 'KB-2025-002', 'IUD', '115/75', 60.00, 'Budi Santoso', '3201234567890106', 38, '125/80', 75.00, '2026-01-07', 'Konseling pergantian metode dari pil ke IUD'),
+('990e8400-e29b-41d4-a716-446655440003', '880e8400-e29b-41d4-a716-446655440011', 'KB-2025-003', NULL, 'Implant', '110/70', 62.00, 'Suami Fitra', '3201234567890004', 35, '120/80', 70.00, '2026-01-20', 'Pemasangan Implant Berjalan Lancar'),
+('990e8400-e29b-41d4-a716-446655440004', '880e8400-e29b-41d4-a716-446655440015', 'KB-2025-004', NULL, 'IUD', '120/80', 65.00, 'Ashraf', '3171121212880001', 35, '125/80', 78.00, '2030-12-18', 'Pemasangan IUD Pasca Salin');
 
 -- =============================================================================
 -- SAMPLE DATA: Layanan ANC
 -- =============================================================================
 INSERT INTO layanan_anc (id_anc, id_pemeriksaan, no_reg_lama, no_reg_baru, nama_suami, nik_suami, umur_suami, hpht, hpl, hasil_pemeriksaan, tindakan, keterangan) VALUES
 ('aa0e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440001', 'ANC-2025-001', 'ANC-2025-001', 'Deni Kurniawan', '3201234567890101', 30, '2025-06-01', '2026-03-08', 'Kehamilan normal, DJJ baik, TFU sesuai usia kehamilan', 'Pemeriksaan rutin ANC', 'Kontrol rutin 2 minggu sekali'),
-('aa0e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440002', NULL, 'ANC-2025-002', 'Eko Prasetyo', '3201234567890105', 32, '2025-07-15', '2026-04-22', 'Kehamilan normal dengan keluhan mual', 'Edukasi diet dan pemberian vitamin B6', 'Morning sickness, perlu follow up');
+('aa0e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440002', NULL, 'ANC-2025-002', 'Eko Prasetyo', '3201234567890105', 32, '2025-07-15', '2026-04-22', 'Kehamilan normal dengan keluhan mual', 'Edukasi diet dan pemberian vitamin B6', 'Morning sickness, perlu follow up'),
+('aa0e8400-e29b-41d4-a716-446655440003', '880e8400-e29b-41d4-a716-446655440013', 'ANC-2025-003', NULL, 'Deni Kurniawan', '3201234567890101', 30, '2025-06-01', '2026-03-08', 'Kehamilan normal 30 minggu', 'Layanan ANC Lanjutan', 'Ibu sehat janin aktif'),
+('aa0e8400-e29b-41d4-a716-446655440004', '880e8400-e29b-41d4-a716-446655440014', 'ANC-2025-004', NULL, 'Suami Siti', '3273111111880001', 36, '2025-09-01', '2026-06-08', 'Hiperemesis Gravidarum', 'Rehidrasi dan Ondansetron', 'Perlu pantauan nutrisi');
 
 -- =============================================================================
 -- SAMPLE DATA: Layanan Imunisasi
 -- =============================================================================
-INSERT INTO layanan_imunisasi (id_imunisasi, id_pemeriksaan, no_reg, nama_bayi_balita, tanggal_lahir_bayi, tb_bayi, bb_bayi, jenis_imunisasi, pengobatan, jadwal_selanjutnya, no_hp_kontak) VALUES
-('bb0e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440005', 'IMN-2025-001', 'Ahmad Fauzan', '2025-10-01', 58.00, 5.50, 'DPT-HB-Hib 1', NULL, '2026-01-10', '081234567892'),
-('bb0e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440006', 'IMN-2025-002', 'Zahra Putri', '2025-03-15', 72.00, 8.20, 'Campak', NULL, '2026-02-01', '081234567897');
+INSERT INTO layanan_imunisasi (id_imunisasi, id_pemeriksaan, no_reg, nama_bayi_balita, tanggal_lahir_bayi, tb_bayi, bb_bayi, jenis_imunisasi, pengobatan, jadwal_selanjutnya, no_hp_kontak, nama_ibu, nik_ibu, umur_ibu, nama_ayah, nik_ayah, umur_ayah) VALUES
+('bb0e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440005', 'IMN-2025-001', 'Ahmad Fauzan', '2025-10-01', 58.00, 5.50, 'DPT-HB-Hib 1', NULL, '2026-01-10', '081234567892', 'Sari Indah Permata', '3201234567890003', 25, 'Budi Santoso', '3201234567890102', 28),
+('bb0e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440006', 'IMN-2025-002', 'Zahra Putri', '2025-03-15', 72.00, 8.20, 'Campak', NULL, '2026-02-01', '081234567897', 'Wulan Sari', '3201234567890008', 24, 'Anto Wijaya', '3201234567890103', 27),
+('bb0e8400-e29b-41d4-a716-446655440003', '880e8400-e29b-41d4-a716-446655440012', 'IMN-2025-003', 'Bayi Ny. Fitri', '2025-11-20', 54.00, 4.20, 'BCG', NULL, '2026-01-22', '081234567893', 'Fitri Handayani', '3201234567890004', 30, 'Suami Fitra', '3201234567890004', 35);
 
 -- =============================================================================
 -- SAMPLE DATA: Layanan Persalinan

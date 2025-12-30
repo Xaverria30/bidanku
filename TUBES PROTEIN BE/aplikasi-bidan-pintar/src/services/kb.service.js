@@ -1,7 +1,7 @@
 /**
- * KB (Family Planning) Service - REBUILT
- * Handles all KB-related database operations
- * Maps frontend fields directly to new database structure
+ * Service KB (Keluarga Berencana)
+ * Menangani semua operasi database terkait KB
+ * Memetakan field frontend secara langsung ke struktur database baru
  */
 
 const db = require('../config/database');
@@ -9,21 +9,21 @@ const { v4: uuidv4 } = require('uuid');
 const auditService = require('./audit.service');
 
 /**
- * Create KB registration with related records
- * Uses transaction to ensure data consistency
- * @param {Object} data - KB registration data from frontend
- * @param {string} userId - User performing the action
- * @returns {Object} Created registration data
+ * Buat registrasi KB baru dengan record terkait
+ * Menggunakan transaksi untuk menjamin konsistensi data
+ * @param {Object} data - Data registrasi KB dari frontend
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Data registrasi yang dibuat
  */
 const createRegistrasiKB = async (data, userId) => {
   const {
-    // Mother (Ibu) information
+    // Informasi Ibu
     nama_ibu, nik_ibu, umur_ibu, td_ibu, bb_ibu, alamat, nomor_hp,
-    // Spouse (Ayah) information
+    // Informasi Suami
     nama_ayah, nik_ayah, umur_ayah, td_ayah, bb_ayah,
-    // Service information
-    jenis_layanan, tanggal, metode, 
-    // Registration and follow-up
+    // Informasi Layanan
+    jenis_layanan, tanggal, metode,
+    // Registrasi dan tindak lanjut
     nomor_registrasi_lama, nomor_registrasi_baru, kunjungan_ulang, catatan
   } = data;
 
@@ -32,12 +32,17 @@ const createRegistrasiKB = async (data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Find or create patient (mother)
+    // 1. Cari atau buat pasien (ibu)
     let id_pasien;
-    const [existingPasien] = await connection.query(
-      'SELECT id_pasien FROM pasien WHERE nik = ?',
-      [nik_ibu]
-    );
+    let existingPasien = [];
+
+    // Hanya cek NIK jika ada dan valid
+    if (nik_ibu && nik_ibu.trim().length > 0) {
+      [existingPasien] = await connection.query(
+        'SELECT id_pasien FROM pasien WHERE nik = ?',
+        [nik_ibu]
+      );
+    }
 
     if (existingPasien.length > 0) {
       id_pasien = existingPasien[0].id_pasien;
@@ -49,14 +54,14 @@ const createRegistrasiKB = async (data, userId) => {
       id_pasien = uuidv4();
       await connection.query(
         'INSERT INTO pasien (id_pasien, nama, nik, umur, alamat, no_hp) VALUES (?, ?, ?, ?, ?, ?)',
-        [id_pasien, nama_ibu, nik_ibu, umur_ibu, alamat, nomor_hp || null]
+        [id_pasien, nama_ibu, nik_ibu || null, umur_ibu, alamat, nomor_hp || null]
       );
     }
 
-    // 2. Create examination record with SOAP format constructed from frontend data
+    // 2. Buat record pemeriksaan dengan format SOAP
     const id_pemeriksaan = uuidv4();
-    
-    // Construct SOAP fields from frontend data
+
+    // Susun field SOAP dari data frontend
     const subjektif_final = `Kunjungan KB Metode: ${metode || '-'}`;
     const objektif_final = `TD Ibu: ${td_ibu || '-'}, BB Ibu: ${bb_ibu || '-'}`;
     const analisa_final = catatan || '';
@@ -68,7 +73,7 @@ const createRegistrasiKB = async (data, userId) => {
       [id_pemeriksaan, id_pasien, jenis_layanan, subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal]
     );
 
-    // 3. Create KB-specific record with new table structure
+    // 3. Buat record spesifik KB
     const id_kb = uuidv4();
     await connection.query(
       `INSERT INTO layanan_kb (
@@ -90,9 +95,9 @@ const createRegistrasiKB = async (data, userId) => {
     await connection.commit();
     await auditService.recordDataLog(userId, 'CREATE', 'layanan_kb', id_kb);
 
-    return { 
-      id_kb, 
-      id_pemeriksaan, 
+    return {
+      id_kb,
+      id_pemeriksaan,
       id_pasien,
       message: 'Registrasi KB berhasil disimpan'
     };
@@ -105,8 +110,10 @@ const createRegistrasiKB = async (data, userId) => {
 };
 
 /**
- * Get KB record by ID
- * Returns data mapped to EXACT frontend field names from handleEdit
+ * Ambil data KB berdasarkan ID
+ * Mengembalikan data yang dipetakan ke field frontend
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @returns {Object} Data KB
  */
 const getKBById = async (id_pemeriksaan) => {
   const query = `
@@ -143,11 +150,11 @@ const getKBById = async (id_pemeriksaan) => {
 };
 
 /**
- * Update KB registration
- * @param {string} id_pemeriksaan - Pemeriksaan ID
- * @param {Object} data - Updated data from frontend
- * @param {string} userId - User performing the update
- * @returns {Object} Updated KB data
+ * Update registrasi KB
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {Object} data - Data update dari frontend
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Data KB terupdate
  */
 const updateRegistrasiKB = async (id_pemeriksaan, data, userId) => {
   const {
@@ -161,7 +168,7 @@ const updateRegistrasiKB = async (id_pemeriksaan, data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // Get existing pemeriksaan
+    // Cek pemeriksaan yang ada
     const [existingPemeriksaan] = await connection.query(
       'SELECT id_pasien FROM pemeriksaan WHERE id_pemeriksaan = ?',
       [id_pemeriksaan]
@@ -173,13 +180,13 @@ const updateRegistrasiKB = async (id_pemeriksaan, data, userId) => {
 
     const id_pasien = existingPemeriksaan[0].id_pasien;
 
-    // Update patient data
+    // Update data pasien
     await connection.query(
       'UPDATE pasien SET nama = ?, nik = ?, umur = ?, alamat = ?, no_hp = ? WHERE id_pasien = ?',
       [nama_ibu, nik_ibu, umur_ibu, alamat, nomor_hp || null, id_pasien]
     );
 
-    // Update pemeriksaan with SOAP format
+    // Update pemeriksaan dengan format SOAP
     const subjektif_final = `Kunjungan KB Metode: ${metode || '-'}`;
     const objektif_final = `TD Ibu: ${td_ibu || '-'}, BB Ibu: ${bb_ibu || '-'}`;
     const analisa_final = catatan || '';
@@ -191,7 +198,7 @@ const updateRegistrasiKB = async (id_pemeriksaan, data, userId) => {
       [subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal, id_pemeriksaan]
     );
 
-    // Update layanan_kb with new table structure
+    // Update layanan_kb
     await connection.query(
       `UPDATE layanan_kb SET 
         nomor_registrasi_lama = ?, nomor_registrasi_baru = ?,
@@ -221,9 +228,9 @@ const updateRegistrasiKB = async (id_pemeriksaan, data, userId) => {
 };
 
 /**
- * Delete KB registration
- * @param {string} id_pemeriksaan - Pemeriksaan ID
- * @param {string} userId - User performing the deletion
+ * Hapus registrasi KB
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {string} userId - ID Pengguna
  */
 const deleteRegistrasiKB = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();
@@ -231,10 +238,10 @@ const deleteRegistrasiKB = async (id_pemeriksaan, userId) => {
   try {
     await connection.beginTransaction();
 
-    // Delete layanan_kb
+    // Hapus dari layanan_kb
     await connection.query('DELETE FROM layanan_kb WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
 
-    // Delete pemeriksaan
+    // Hapus dari pemeriksaan
     await connection.query('DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
 
     await connection.commit();
@@ -248,8 +255,9 @@ const deleteRegistrasiKB = async (id_pemeriksaan, userId) => {
 };
 
 /**
- * Get all KB records (with optional search/filter)
- * Returns fields expected by frontend fetchRiwayatPelayanan
+ * Ambil semua data KB (opsional filter pencarian)
+ * @param {string} search - Kata kunci pencarian
+ * @returns {Array} Daftar KB
  */
 const getAllKB = async (search = '') => {
   try {

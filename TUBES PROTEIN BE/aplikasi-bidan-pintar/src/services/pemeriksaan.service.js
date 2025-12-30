@@ -1,6 +1,6 @@
 /**
- * Examination Service
- * Handles all medical examination (SOAP) database operations
+ * Service Pemeriksaan
+ * Menangani semua operasi database pemeriksaan medis (SOAP)
  */
 
 const db = require('../config/database');
@@ -8,25 +8,21 @@ const { v4: uuidv4 } = require('uuid');
 const auditService = require('./audit.service');
 
 /**
- * Get all examination records with optional filtering
- * @param {string} jenisLayanan - Filter by service type (optional)
- * @param {string} search - Search by patient name (optional)
- * @returns {Array} List of examinations
+ * Ambil semua data pemeriksaan dengan filter opsional
+ * @param {string} jenisLayanan - Filter jenis layanan (opsional)
+ * @param {string} search - Cari berdasarkan nama pasien (opsional)
+ * @returns {Array} Daftar pemeriksaan
  */
 const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
-  console.log('🔍 Service getAllPemeriksaan called with:', { jenisLayanan, search });
-  
-  // Normalize empty strings to null
+  // Formalisasi string kosong menjadi null
   jenisLayanan = jenisLayanan && jenisLayanan.trim() !== '' ? jenisLayanan.trim() : null;
   search = search && search.trim() !== '' ? search.trim() : null;
-  
-  console.log('🔍 After normalization:', { jenisLayanan, search });
-  
+
   let query = `
     SELECT p.*, pas.nama AS nama_pasien
   `;
 
-  // Add layanan-specific fields based on jenis_layanan
+  // Tambahkan field spesifik layanan berdasarkan jenis_layanan
   if (jenisLayanan === 'KB') {
     query += `, kb.id_kb, kb.nomor_registrasi_lama, kb.nomor_registrasi_baru, kb.metode`;
   } else if (jenisLayanan === 'ANC') {
@@ -44,7 +40,7 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
   `;
 
-  // Add layanan JOINs based on jenis_layanan
+  // Join tabel layanan berdasarkan jenis_layanan
   if (jenisLayanan === 'KB') {
     query += ` LEFT JOIN layanan_kb kb ON p.id_pemeriksaan = kb.id_pemeriksaan`;
   } else if (jenisLayanan === 'ANC') {
@@ -60,29 +56,25 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
   query += ` WHERE 1=1`;
   const params = [];
 
-  // Filter by jenis_layanan if provided
+  // Filter jenis_layanan jika ada
   if (jenisLayanan) {
     query += ` AND p.jenis_layanan = ?`;
     params.push(jenisLayanan);
-    console.log('  ➕ Added jenis_layanan filter:', jenisLayanan);
   }
 
-  // Search by patient name if provided
+  // Filter nama pasien jika ada
   if (search) {
     query += ` AND pas.nama LIKE ?`;
     params.push(`%${search}%`);
-    console.log('  ➕ Added search filter:', search);
   }
 
   query += ` ORDER BY p.tanggal_pemeriksaan DESC`;
 
-  console.log('  📝 Final query params:', params);
   const [rows] = await db.query(query, params);
-  console.log('  ✅ Query returned:', rows.length, 'rows');
-  
-  // Normalize field names for consistency in frontend
+
+  // Normalisasi nama field untuk konsistensi frontend
   const normalizedRows = rows.map(row => {
-    // Normalize nomor_registrasi field based on service type
+    // Normalisasi field nomor_registrasi berdasarkan jenis layanan
     if (row.jenis_layanan === 'KB' && row.nomor_registrasi_baru) {
       row.nomor_registrasi = row.nomor_registrasi_baru || row.nomor_registrasi_lama;
     } else if (row.jenis_layanan === 'ANC') {
@@ -94,14 +86,14 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
     }
     return row;
   });
-  
+
   return normalizedRows;
 };
 
 /**
- * Get examination by ID
- * @param {string} id_pemeriksaan - Examination ID
- * @returns {Object|null} Examination details
+ * Ambil detail pemeriksaan berdasarkan ID
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @returns {Object|null} Detail pemeriksaan
  */
 const getDetailPemeriksaan = async (id_pemeriksaan) => {
   const query = `
@@ -115,10 +107,10 @@ const getDetailPemeriksaan = async (id_pemeriksaan) => {
 };
 
 /**
- * Create new examination record (SOAP)
- * @param {Object} data - Examination data
- * @param {string} userId - User performing the action
- * @returns {Object} Created examination
+ * Buat record pemeriksaan baru (SOAP)
+ * @param {Object} data - Data pemeriksaan
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Pemeriksaan yang dibuat
  */
 const createPemeriksaan = async (data, userId) => {
   const { id_pasien, jenis_layanan, subjektif, objektif, analisa, tatalaksana } = data;
@@ -137,11 +129,11 @@ const createPemeriksaan = async (data, userId) => {
 };
 
 /**
- * Update examination record
- * @param {string} id_pemeriksaan - Examination ID
- * @param {string} userId - User performing the action
- * @param {Object} data - Updated examination data
- * @returns {Object} Updated examination
+ * Update record pemeriksaan
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {string} userId - ID Pengguna
+ * @param {Object} data - Data pemeriksaan update
+ * @returns {Object} Pemeriksaan terupdate
  */
 const updatePemeriksaan = async (id_pemeriksaan, userId, data) => {
   const { id_pasien, jenis_layanan, subjektif, objektif, analisa, tatalaksana } = data;

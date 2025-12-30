@@ -1,6 +1,6 @@
 /**
- * Laporan (Report) Controller
- * Handles HTTP requests for report generation
+ * Controller Laporan
+ * Menangani request HTTP untuk pembuatan laporan
  */
 
 const ExcelJS = require('exceljs');
@@ -8,7 +8,7 @@ const laporanService = require('../services/laporan.service');
 const { success, badRequest, serverError, notFound } = require('../utils/response');
 
 /**
- * Get list of laporan summaries
+ * Ambil daftar ringkasan laporan
  * GET /api/laporan/list
  */
 const getLaporanList = async (req, res) => {
@@ -19,9 +19,9 @@ const getLaporanList = async (req, res) => {
       search: req.query.search,
       limit: req.query.limit
     };
-    
+
     const laporanList = await laporanService.getLaporanList(filters);
-    
+
     return success(res, 'Data laporan berhasil diambil', laporanList);
   } catch (error) {
     console.error('Error fetching laporan list:', error);
@@ -30,18 +30,18 @@ const getLaporanList = async (req, res) => {
 };
 
 /**
- * Get laporan by ID
+ * Ambil laporan berdasarkan ID
  * GET /api/laporan/:id
  */
 const getLaporanById = async (req, res) => {
   try {
     const { id } = req.params;
     const laporan = await laporanService.getLaporanById(id);
-    
+
     if (!laporan) {
       return notFound(res, 'Laporan tidak ditemukan');
     }
-    
+
     return success(res, 'Data laporan berhasil diambil', laporan);
   } catch (error) {
     console.error('Error fetching laporan by ID:', error);
@@ -50,18 +50,18 @@ const getLaporanById = async (req, res) => {
 };
 
 /**
- * Create new laporan summary
+ * Buat ringkasan laporan baru
  * POST /api/laporan
  */
 const createLaporan = async (req, res) => {
   try {
     const { jenis_layanan, periode, tanggal_dibuat, jumlah_pasien, jumlah_kunjungan, label } = req.body;
-    
-    // Validation
+
+    // Validasi
     if (!jenis_layanan || !periode) {
       return badRequest(res, 'Jenis layanan dan periode harus diisi');
     }
-    
+
     const data = {
       jenis_layanan,
       periode,
@@ -70,9 +70,9 @@ const createLaporan = async (req, res) => {
       jumlah_kunjungan,
       label
     };
-    
+
     const newLaporan = await laporanService.createLaporan(data);
-    
+
     return success(res, 'Laporan berhasil dibuat', newLaporan, 201);
   } catch (error) {
     console.error('Error creating laporan:', error);
@@ -88,15 +88,15 @@ const updateLaporan = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    
-    // Check if laporan exists
+
+    // Cek apakah laporan ada
     const existingLaporan = await laporanService.getLaporanById(id);
     if (!existingLaporan) {
       return notFound(res, 'Laporan tidak ditemukan');
     }
-    
+
     const updatedLaporan = await laporanService.updateLaporan(id, updateData);
-    
+
     return success(res, 'Laporan berhasil diupdate', updatedLaporan);
   } catch (error) {
     console.error('Error updating laporan:', error);
@@ -105,25 +105,25 @@ const updateLaporan = async (req, res) => {
 };
 
 /**
- * Delete laporan
+ * Hapus laporan
  * DELETE /api/laporan/:id
  */
 const deleteLaporan = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // Check if laporan exists
+
+    // Cek apakah laporan ada
     const existingLaporan = await laporanService.getLaporanById(id);
     if (!existingLaporan) {
       return notFound(res, 'Laporan tidak ditemukan');
     }
-    
+
     const deleted = await laporanService.deleteLaporan(id);
-    
+
     if (!deleted) {
       return serverError(res, 'Gagal menghapus laporan');
     }
-    
+
     return success(res, 'Laporan berhasil dihapus');
   } catch (error) {
     console.error('Error deleting laporan:', error);
@@ -132,14 +132,14 @@ const deleteLaporan = async (req, res) => {
 };
 
 /**
- * Generate monthly report (Excel format)
+ * Generate laporan bulanan (Format Excel)
  * GET /api/laporan?format=excel&bulan=1&tahun=2025
  */
 const generateLaporanBulanan = async (req, res) => {
-  const { format, bulan, tahun } = req.query;
+  const { format, bulan, tahun, jenis_layanan } = req.query;
   const userId = req.user?.id || 'SYSTEM';
 
-  // Validate parameters
+  // Validasi parameter
   if (!format || format.toLowerCase() !== 'excel') {
     return badRequest(res, 'Format harus "excel"');
   }
@@ -160,7 +160,7 @@ const generateLaporanBulanan = async (req, res) => {
   }
 
   try {
-    const reportData = await laporanService.getLaporanData(bulanInt, tahunInt);
+    const reportData = await laporanService.getLaporanData(bulanInt, tahunInt, jenis_layanan);
 
     if (reportData.length === 0) {
       // Jika tidak ada data, tetap generate file Excel kosong dengan header
@@ -247,7 +247,7 @@ const generateLaporanBulanan = async (req, res) => {
         analisa: data.analisa || '-',
         tatalaksana: data.tatalaksana || '-'
       });
-      
+
       // Alternate row colors
       if (index % 2 === 1) {
         row.fill = {
@@ -275,11 +275,72 @@ const generateLaporanBulanan = async (req, res) => {
   }
 };
 
+/**
+ * Ambil statistik ringkasan laporan (JSON)
+ * GET /api/laporan/summary?bulan=1&tahun=2025&jenis_layanan=Semua
+ */
+const getSummary = async (req, res) => {
+  try {
+    const { bulan, tahun, jenis_layanan } = req.query;
+
+    // Default ke bulan saat ini jika tidak ditentukan
+    const now = new Date();
+    const currentBulan = bulan ? parseInt(bulan) : now.getMonth() + 1;
+    const currentTahun = tahun ? parseInt(tahun) : now.getFullYear();
+    const layanan = jenis_layanan || 'Semua';
+
+    const stats = await laporanService.calculateLaporanSummary(layanan, currentBulan, currentTahun);
+
+    // Ambil juga daftar record untuk tabel
+    const data = await laporanService.getLaporanData(currentBulan, currentTahun, layanan);
+
+    // Hitung statistik umum untuk kartu dashboard
+    // 1. Total Pasien (unik)
+    // 2. Total Kunjungan
+    // 3. Layanan terpopuler (kalkulasi sederhana dari data)
+
+    const serviceCounts = {};
+    data.forEach(item => {
+      const svc = item.jenis_layanan;
+      serviceCounts[svc] = (serviceCounts[svc] || 0) + 1;
+    });
+
+    let topService = '-';
+    let maxCount = 0;
+    Object.entries(serviceCounts).forEach(([svc, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        topService = svc;
+      }
+    });
+
+    return success(res, 'Summary berhasil diambil', {
+      stats: {
+        total_pasien: stats.jumlah_pasien,
+        total_kunjungan: stats.jumlah_kunjungan,
+        layanan_terbanyak: topService
+      },
+      data: data, // Kembalikan juga daftar mentah untuk tabel
+      filter: {
+        bulan: currentBulan,
+        tahun: currentTahun,
+        layanan: layanan
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting summary:', error);
+    return serverError(res, 'Gagal mengambil summary laporan', error);
+  }
+};
+
 module.exports = {
   getLaporanList,
   getLaporanById,
   createLaporan,
   updateLaporan,
   deleteLaporan,
-  generateLaporanBulanan
+  deleteLaporan,
+  generateLaporanBulanan,
+  getSummary
 };

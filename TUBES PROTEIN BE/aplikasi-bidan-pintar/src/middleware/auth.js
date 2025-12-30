@@ -1,6 +1,6 @@
 /**
- * Authentication Middleware
- * JWT token verification
+ * Middleware Autentikasi
+ * Verifikasi token JWT
  */
 
 const jwt = require('jsonwebtoken');
@@ -8,13 +8,13 @@ const { JWT_SECRET } = require('../utils/constant');
 const { unauthorized, forbidden } = require('../utils/response');
 
 /**
- * Verify JWT token from Authorization header
- * Token format: Bearer <token>
+ * Verifikasi token JWT dari header Authorization
+ * Format token: Bearer <token>
  */
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Check if authorization header exists and has correct format
+  // Cek apakah header authorization ada dan formatnya benar
   if (!authHeader?.startsWith('Bearer ')) {
     return unauthorized(res, 'Token tidak ditemukan atau format salah');
   }
@@ -22,10 +22,10 @@ const verifyToken = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    // Verify and decode token
+    // Verifikasi dan decode token
     const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // Attach user data to request object
+
+    // Lampirkan data user ke objek request
     req.user = {
       id: decoded.id,
       username: decoded.username,
@@ -42,8 +42,8 @@ const verifyToken = (req, res, next) => {
 };
 
 /**
- * Optional authentication - doesn't fail if no token
- * Useful for routes that work with or without auth
+ * Autentikasi Opsional - tidak gagal jika tidak ada token
+ * Berguna untuk rute yang bisa bekerja dengan atau tanpa login
  */
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -62,7 +62,7 @@ const optionalAuth = (req, res, next) => {
       email: decoded.email
     };
   } catch (error) {
-    // Ignore token errors for optional auth
+    // Abaikan error token untuk auth opsional
   }
 
   next();

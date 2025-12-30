@@ -1,17 +1,17 @@
 /**
- * Audit Service
- * Handles logging of user actions and access attempts
+ * Service Audit
+ * Menangani pencatatan aktivitas pengguna dan upaya akses
  */
 
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * Record login attempt
- * @param {string|null} userId - User ID (null if user not found)
- * @param {string} username - Username attempted
- * @param {'BERHASIL'|'GAGAL'} status - Login status
- * @param {string} ipAddress - Client IP address
+ * Catat upaya login
+ * @param {string|null} userId - ID User (null jika user tidak ditemukan)
+ * @param {string} username - Username yang dicoba
+ * @param {'BERHASIL'|'GAGAL'} status - Status login
+ * @param {string} ipAddress - Alamat IP Klien
  */
 const recordLoginAttempt = async (userId, username, status, ipAddress) => {
   try {
@@ -22,14 +22,14 @@ const recordLoginAttempt = async (userId, username, status, ipAddress) => {
     `;
     await db.query(query, [id_akses, userId, username, status, ipAddress]);
   } catch (error) {
-    console.error('[AUDIT] Login attempt log failed:', error.message);
+    console.error('[AUDIT] Gagal mencatat upaya login:', error.message);
   }
 };
 
 /**
- * Get access logs (login history)
- * @param {Object} filters - Filter options
- * @returns {Array} Array of access logs
+ * Ambil log akses (riwayat login)
+ * @param {Object} filters - Opsi filter
+ * @returns {Array} Daftar log akses
  */
 const getAccessLogs = async (filters = {}) => {
   try {
@@ -58,17 +58,17 @@ const getAccessLogs = async (filters = {}) => {
     const [results] = await db.query(query, params);
     return results;
   } catch (error) {
-    console.error('[AUDIT] Get access logs failed:', error.message);
+    console.error('[AUDIT] Gagal mengambil log akses:', error.message);
     throw error;
   }
 };
 
 /**
- * Record data modification log (CRUD operations)
- * @param {string} userId - User ID performing the action
- * @param {'CREATE'|'UPDATE'|'DELETE'} action - Action type
- * @param {string} tableName - Affected table name
- * @param {string} dataId - ID of affected record
+ * Catat log modifikasi data (Operasi CRUD)
+ * @param {string} userId - ID User yang melakukan aksi
+ * @param {'CREATE'|'UPDATE'|'DELETE'} action - Jenis aksi
+ * @param {string} tableName - Nama tabel yang terpengaruh
+ * @param {string} dataId - ID data yang terpengaruh
  */
 const recordDataLog = async (userId, action, tableName, dataId) => {
   try {
@@ -79,15 +79,15 @@ const recordDataLog = async (userId, action, tableName, dataId) => {
     `;
     await db.query(query, [id_audit, userId, action, tableName, dataId]);
   } catch (error) {
-    console.error('[AUDIT] Data log failed:', error.message);
+    console.error('[AUDIT] Gagal mencatat log data:', error.message);
     throw error;
   }
 };
 
 /**
- * Get basic data modification logs
- * @param {Object} filters - Filter options
- * @returns {Array} Array of basic audit logs
+ * Ambil log modifikasi data dasar
+ * @param {Object} filters - Opsi filter
+ * @returns {Array} Daftar log audit dasar
  */
 const getDataLogs = async (filters = {}) => {
   try {
@@ -120,15 +120,15 @@ const getDataLogs = async (filters = {}) => {
     const [results] = await db.query(query, params);
     return results;
   } catch (error) {
-    console.error('[AUDIT] Get data logs failed:', error.message);
+    console.error('[AUDIT] Gagal mengambil log data:', error.message);
     throw error;
   }
 };
 
 /**
- * Get data modification logs with detailed information
- * @param {Object} filters - Filter options
- * @returns {Array} Array of audit logs with user info and data details
+ * Ambil log modifikasi data dengan informasi detail
+ * @param {Object} filters - Opsi filter
+ * @returns {Array} Daftar log audit dengan info user dan detail data
  */
 const getDetailedDataLogs = async (filters = {}) => {
   try {
@@ -192,7 +192,7 @@ const getDetailedDataLogs = async (filters = {}) => {
     const [results] = await db.query(query, params);
     return results;
   } catch (error) {
-    console.error('[AUDIT] Get detailed data logs failed:', error.message);
+    console.error('[AUDIT] Gagal mengambil log data detail:', error.message);
     throw error;
   }
 };
