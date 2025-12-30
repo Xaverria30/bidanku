@@ -89,9 +89,20 @@ const handleResponse = async (response, endpoint = '') => {
       }
     }
 
-    const error = new Error(data.message || 'Terjadi kesalahan');
+    // Build error message including validation details if available
+    let errorMessage = data.message || 'Terjadi kesalahan';
+    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      // For validation errors, include first field error
+      const firstError = data.errors[0];
+      if (firstError.message) {
+        errorMessage = firstError.message;
+      }
+    }
+
+    const error = new Error(errorMessage);
     error.status = response.status;
     error.data = data;
+    error.validationErrors = data.errors;
     throw error;
   }
 

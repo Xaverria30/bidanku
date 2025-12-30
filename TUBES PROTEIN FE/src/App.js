@@ -106,6 +106,10 @@ function App() {
 
   const handleToVerifikasiOTP = (email) => {
     setResetEmail(email);
+    setOtpData({
+      email: email,
+      usernameOrEmail: email  // Use email as usernameOrEmail for password reset flow
+    });
     navigate('/verifikasi-otp');
   };
 
