@@ -42,17 +42,17 @@
 }
 
 .sidebar-profile-icon {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   margin: 0 auto 15px;
-  background: linear-gradient(135deg, #E89AC7 0%, #F4A3D2 100%);
+  background: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   padding: 8px;
-  box-shadow: 0 4px 12px rgba(232, 154, 199, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-logo-img {

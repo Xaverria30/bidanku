@@ -1,17 +1,17 @@
 /**
- * Schedule Service
- * Handles all schedule-related database operations
+ * Service Jadwal
+ * Menangani semua operasi database terkait jadwal
  */
 
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * Get all schedules with optional filters
- * @param {number} bulan - Month filter
- * @param {number} tahun - Year filter
- * @param {string} layanan - Service type filter
- * @returns {Array} List of schedules
+ * Ambil daftar jadwal dengan filter opsional
+ * @param {number} bulan - Filter bulan
+ * @param {number} tahun - Filter tahun
+ * @param {string} layanan - Filter jenis layanan
+ * @returns {Array} Daftar jadwal
  */
 const listJadwal = async (bulan, tahun, layanan) => {
   let query = `
@@ -43,9 +43,9 @@ const listJadwal = async (bulan, tahun, layanan) => {
 };
 
 /**
- * Create new schedule
- * @param {Object} data - Schedule data
- * @returns {Object} Created schedule
+ * Buat jadwal baru
+ * @param {Object} data - Data jadwal
+ * @returns {Object} Jadwal yang dibuat
  */
 const createJadwal = async (data) => {
   const { id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai } = data;
@@ -62,9 +62,9 @@ const createJadwal = async (data) => {
 };
 
 /**
- * Get schedule by ID with related data
- * @param {string} id_jadwal - Schedule ID
- * @returns {Object|null} Schedule details
+ * Ambil detail jadwal berdasarkan ID
+ * @param {string} id_jadwal - ID Jadwal
+ * @returns {Object|null} Detail jadwal
  */
 const getDetailJadwal = async (id_jadwal) => {
   const query = `
@@ -83,10 +83,10 @@ const getDetailJadwal = async (id_jadwal) => {
 };
 
 /**
- * Update schedule
- * @param {string} id_jadwal - Schedule ID
- * @param {Object} data - Updated schedule data
- * @returns {Object} Updated schedule
+ * Update jadwal
+ * @param {string} id_jadwal - ID Jadwal
+ * @param {Object} data - Data jadwal terbaru
+ * @returns {Object} Jadwal terupdate
  */
 const updateJadwal = async (id_jadwal, data) => {
   const { id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai } = data;
@@ -103,9 +103,9 @@ const updateJadwal = async (id_jadwal, data) => {
 };
 
 /**
- * Delete schedule
- * @param {string} id_jadwal - Schedule ID
- * @returns {Object} Delete result
+ * Hapus jadwal
+ * @param {string} id_jadwal - ID Jadwal
+ * @returns {Object} Hasil penghapusan
  */
 const deleteJadwal = async (id_jadwal) => {
   const [result] = await db.query('DELETE FROM jadwal WHERE id_jadwal = ?', [id_jadwal]);

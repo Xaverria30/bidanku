@@ -1,6 +1,6 @@
 /**
- * Report Routes
- * Protected routes for report generation and management
+ * Rute Laporan
+ * Rute yang dilindungi untuk pembuatan dan pengelolaan laporan
  */
 
 const express = require('express');
@@ -8,18 +8,19 @@ const router = express.Router();
 const laporanController = require('../controllers/laporan.controller');
 const { verifyToken } = require('../middleware/auth');
 
-// All routes require authentication
+// Semua rute membutuhkan autentikasi
 router.use(verifyToken);
 
-// Report endpoints
-router.get('/list', laporanController.getLaporanList);         // Get list of laporan summaries
-router.get('/export', laporanController.generateLaporanBulanan); // Generate Excel (query params)
-router.get('/:id', laporanController.getLaporanById);           // Get single laporan by ID
-router.post('/', laporanController.createLaporan);              // Create new laporan
+// Endpoint Laporan
+router.get('/summary', laporanController.getSummary);           // Ambil summary & data dashboard
+router.get('/list', laporanController.getLaporanList);         // Ambil daftar ringkasan laporan
+router.get('/export', laporanController.generateLaporanBulanan); // Generate Excel (parameter query)
+router.get('/:id', laporanController.getLaporanById);           // Ambil satu laporan berdasarkan ID
+router.post('/', laporanController.createLaporan);              // Buat laporan baru
 router.put('/:id', laporanController.updateLaporan);            // Update laporan
-router.delete('/:id', laporanController.deleteLaporan);         // Delete laporan
+router.delete('/:id', laporanController.deleteLaporan);         // Hapus laporan
 
-// Legacy support - keep GET / for Excel generation
+// Support Legacy - tetap simpan GET / untuk generate Excel
 router.get('/', laporanController.generateLaporanBulanan);
 
 module.exports = router;

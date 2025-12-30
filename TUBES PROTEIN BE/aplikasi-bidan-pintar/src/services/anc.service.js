@@ -1,6 +1,6 @@
 /**
- * ANC (Antenatal Care) Service
- * Handles all ANC-related database operations with transaction support
+ * Service ANC (Antenatal Care/Pemeriksaan Kehamilan)
+ * Menangani semua operasi database terkait ANC dengan dukungan transaksi
  */
 
 const db = require('../config/database');
@@ -9,14 +9,18 @@ const auditService = require('./audit.service');
 const jadwalService = require('./jadwal.service');
 
 /**
- * Create ANC registration with related records
- * Uses transaction to ensure data consistency
- * Frontend sends: nama_istri, nik_istri, umur_istri, alamat, no_hp, jenis_layanan, tanggal, 
- *                 tindakan, no_reg_lama, no_reg_baru, nama_suami, nik_suami, umur_suami,
- *                 hpht, hpl, hasil_pemeriksaan, keterangan
- * @param {Object} data - ANC registration data from frontend
- * @param {string} userId - User performing the action
- * @returns {Object} Created registration data
+ * Membuat registrasi ANC baru dengan data terkait
+ * Menggunakan transaksi database (ACID) untuk menjaga konsistensi data
+ * 
+ * Frontend mengirim data: 
+ * - Detail Ibu: nama_istri, nik_istri, umur_istri, alamat, no_hp
+ * - Detail Layanan: jenis_layanan, tanggal, tindakan, no_reg_lama, no_reg_baru
+ * - Detail Suami: nama_suami, nik_suami, umur_suami
+ * - Hasil Pemeriksaan: hpht, hpl, hasil_pemeriksaan, keterangan
+ * 
+ * @param {Object} data - Data registrasi ANC dari frontend
+ * @param {string} userId - ID pengguna yang melakukan aksi
+ * @returns {Object} Data registrasi yang dibuat
  */
 const createRegistrasiANC = async (data, userId) => {
   const {
@@ -31,12 +35,18 @@ const createRegistrasiANC = async (data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Find or create patient (mother)
+    // 1. Cari atau buat data pasien (ibu)
+    // Jika pasien sudah ada berdasarkan NIK, update datanya
     let id_pasien;
-    const [existingPasien] = await connection.query(
-      'SELECT id_pasien FROM pasien WHERE nik = ?',
-      [nik_istri]
-    );
+    let existingPasien = [];
+
+    // Hanya cek NIK jika ada dan valid
+    if (nik_istri && nik_istri.trim().length > 0) {
+      [existingPasien] = await connection.query(
+        'SELECT id_pasien FROM pasien WHERE nik = ?',
+        [nik_istri]
+      );
+    }
 
     if (existingPasien.length > 0) {
       id_pasien = existingPasien[0].id_pasien;
@@ -48,14 +58,14 @@ const createRegistrasiANC = async (data, userId) => {
       id_pasien = uuidv4();
       await connection.query(
         'INSERT INTO pasien (id_pasien, nama, nik, umur, alamat, no_hp) VALUES (?, ?, ?, ?, ?, ?)',
-        [id_pasien, nama_istri, nik_istri, umur_istri, alamat, no_hp]
+        [id_pasien, nama_istri, nik_istri || null, umur_istri, alamat, no_hp]
       );
     }
 
-    // 2. Create examination record with SOAP format constructed from frontend data
+    // 2. Buat record pemeriksaan dengan format SOAP
     const id_pemeriksaan = uuidv4();
-    
-    // Construct SOAP fields from frontend data
+
+    // Susun field SOAP (Subjektif, Objektif, Analisa, Tatalaksana) dari data frontend
     const subjektif_final = `ANC Kunjungan${hpht ? `. HPHT: ${hpht}` : ''}${hpl ? `, HPL: ${hpl}` : ''}`;
     const objektif_final = hasil_pemeriksaan ? `Hasil Pemeriksaan: ${hasil_pemeriksaan}` : '';
     const analisa_final = keterangan || '';
@@ -67,7 +77,7 @@ const createRegistrasiANC = async (data, userId) => {
       [id_pemeriksaan, id_pasien, jenis_layanan, subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal]
     );
 
-    // 3. Create ANC-specific record
+    // 3. Buat record spesifik layanan ANC
     const id_anc = uuidv4();
     await connection.query(
       `INSERT INTO layanan_anc (id_anc, id_pemeriksaan, no_reg_lama, no_reg_baru, nama_suami, nik_suami, umur_suami, hpht, hpl, hasil_pemeriksaan, tindakan, keterangan)
@@ -76,11 +86,13 @@ const createRegistrasiANC = async (data, userId) => {
     );
 
     await connection.commit();
+
+    // Catat log aktivitas
     await auditService.recordDataLog(userId, 'CREATE', 'layanan_anc', id_anc);
 
-    return { 
-      id_anc, 
-      id_pemeriksaan, 
+    return {
+      id_anc,
+      id_pemeriksaan,
       id_pasien,
       message: 'Registrasi ANC berhasil disimpan'
     };
@@ -93,9 +105,9 @@ const createRegistrasiANC = async (data, userId) => {
 };
 
 /**
- * Get ANC record by ID
- * @param {string} id_pemeriksaan - Pemeriksaan ID
- * @returns {Object} ANC record with related data
+ * Ambil data ANC berdasarkan ID Pemeriksaan
+ * @param {string} id_pemeriksaan - Link ke tabel pemeriksaan
+ * @returns {Object} Record ANC lengkap dengan data pasien
  */
 const getANCById = async (id_pemeriksaan) => {
   const query = `
@@ -119,14 +131,11 @@ const getANCById = async (id_pemeriksaan) => {
 };
 
 /**
- * Update ANC registration
- * Frontend sends: nama_istri, nik_istri, umur_istri, alamat, no_hp, tanggal,
- *                 tindakan, no_reg_lama, no_reg_baru, nama_suami, nik_suami, umur_suami,
- *                 hpht, hpl, hasil_pemeriksaan, keterangan
- * @param {string} id_pemeriksaan - Pemeriksaan ID
- * @param {Object} data - Updated data from frontend
- * @param {string} userId - User performing the update
- * @returns {Object} Updated ANC data
+ * Update registrasi ANC
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {Object} data - Data update dari frontend
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Data ANC yang sudah diupdate
  */
 const updateANCRegistrasi = async (id_pemeriksaan, data, userId) => {
   const {
@@ -141,7 +150,7 @@ const updateANCRegistrasi = async (id_pemeriksaan, data, userId) => {
   try {
     await connection.beginTransaction();
 
-    // Get existing pemeriksaan
+    // Cek apakah data pemeriksaan ada
     const [existingPemeriksaan] = await connection.query(
       'SELECT id_pasien FROM pemeriksaan WHERE id_pemeriksaan = ?',
       [id_pemeriksaan]
@@ -153,13 +162,13 @@ const updateANCRegistrasi = async (id_pemeriksaan, data, userId) => {
 
     const id_pasien = existingPemeriksaan[0].id_pasien;
 
-    // Update patient data
+    // Update data pasien
     await connection.query(
       'UPDATE pasien SET nama = ?, nik = ?, umur = ?, alamat = ?, no_hp = ? WHERE id_pasien = ?',
       [nama_istri, nik_istri, umur_istri, alamat, no_hp || null, id_pasien]
     );
 
-    // Update pemeriksaan with SOAP format constructed from frontend data
+    // Update pemeriksaan dengan format SOAP
     const subjektif_final = `ANC Kunjungan${hpht ? `. HPHT: ${hpht}` : ''}${hpl ? `, HPL: ${hpl}` : ''}`;
     const objektif_final = hasil_pemeriksaan ? `Hasil Pemeriksaan: ${hasil_pemeriksaan}` : '';
     const analisa_final = keterangan || '';
@@ -192,9 +201,9 @@ const updateANCRegistrasi = async (id_pemeriksaan, data, userId) => {
 };
 
 /**
- * Delete ANC registration
- * @param {string} id_pemeriksaan - Pemeriksaan ID
- * @param {string} userId - User performing the deletion
+ * Hapus registrasi ANC
+ * @param {string} id_pemeriksaan - ID Pemeriksaan
+ * @param {string} userId - ID Pengguna
  */
 const deleteANCRegistrasi = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();
@@ -202,10 +211,10 @@ const deleteANCRegistrasi = async (id_pemeriksaan, userId) => {
   try {
     await connection.beginTransaction();
 
-    // Delete layanan_anc
+    // Hapus dari tabel layanan_anc
     await connection.query('DELETE FROM layanan_anc WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
 
-    // Delete pemeriksaan
+    // Hapus dari tabel pemeriksaan
     await connection.query('DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
 
     await connection.commit();

@@ -5,7 +5,7 @@
   flex-direction: column;
 }
 
-/* ===== Header ===== */
+/* ===== Bagian Header ===== */
 .laporan-header {
   background: white;
   border: 1px solid #E89AC7;
@@ -70,335 +70,290 @@
   box-shadow: 0 4px 8px rgba(201, 76, 139, 0.3);
 }
 
-/* ===== Content Layout ===== */
+/* ===== Layout Konten ===== */
 .laporan-content {
   display: flex;
   flex: 1;
   min-height: calc(100vh - 90px);
 }
 
-/* ===== Sidebar ===== */
-.laporan-sidebar {
-  width: 220px;
-  background: white;
-  border-right: 2px solid #e0e0e0;
-  padding: 30px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.laporan-sidebar-profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  padding: 0 20px;
-}
-
-.laporan-profile-avatar {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, #E89AC7 0%, #D987BE 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.btn-profil-laporan {
-  background: #C94C8B;
-  color: white;
-  border: none;
-  padding: 10px 25px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-profil-laporan:hover {
-  background: #B8417A;
-  transform: scale(1.05);
-}
-
-.laporan-sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.laporan-menu-section {
-  padding: 0 20px;
-}
-
-.laporan-menu-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-  margin: 0 0 10px 0;
-  padding: 10px;
-  background: linear-gradient(135deg, #E89AC7 0%, #D987BE 100%);
-  color: white;
-  border-radius: 8px;
-}
-
-.laporan-menu-item {
-  width: 100%;
-  background: white;
-  border: none;
-  padding: 12px 15px;
-  text-align: left;
-  font-size: 13px;
-  color: #333;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-}
-
-.laporan-menu-item:hover {
-  background: #f8f8f8;
-  transform: translateX(5px);
-}
-
-.laporan-menu-icon {
-  font-size: 16px;
-  width: 20px;
-  display: inline-block;
-}
-
-/* ===== Main Area ===== */
+/* ===== Area Utama ===== */
 .laporan-main-area {
   flex: 1;
-  padding: 30px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  padding: 20px 40px;
+  overflow-y: auto;
 }
 
-/* ===== Filter Section ===== */
+/* ===== Bagian Filter ===== */
 .laporan-filter-section {
-  background: linear-gradient(135deg, #E89AC7 0%, #D987BE 100%);
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #E89AC7 0%, #D687B8 100%);
+  border-radius: 15px;
+  padding: 25px 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(232, 154, 199, 0.2);
 }
 
-.laporan-filter-group {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
+.filter-tabs {
+  display: flex;
   gap: 15px;
-  align-items: end;
+  align-items: flex-end;
 }
 
-.laporan-filter-item {
+.filter-tab {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.laporan-filter-item label {
-  color: #fff;
+.filter-tab label {
+  color: white;
   font-size: 14px;
   font-weight: 600;
-  padding-left: 5px;
+  text-align: center;
 }
 
-.laporan-filter-item select,
-.laporan-filter-item input {
+.filter-select,
+.filter-date {
+  width: 100%;
   padding: 10px 15px;
   border: none;
-  border-radius: 20px;
-  background: white;
+  border-radius: 8px;
   font-size: 14px;
-  outline: none;
+  background: white;
+  color: #333;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.laporan-filter-item input {
-  cursor: text;
+.filter-select:focus,
+.filter-date:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
-.btn-filter-laporan {
-  background: #8B5A8E;
+.btn-filter {
+  padding: 10px 25px;
+  background: #8B4869;
   color: white;
   border: none;
-  padding: 10px 30px;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  height: 42px;
+  height: fit-content;
 }
 
-.btn-filter-laporan:hover {
-  background: #7A4D7D;
-  transform: scale(1.05);
+.btn-filter:hover:not(:disabled) {
+  background: #7A3D5A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(139, 72, 105, 0.3);
 }
 
-/* ===== Search Section ===== */
+.btn-filter:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Bagian Pencarian ===== */
 .laporan-search-section {
-  background: linear-gradient(135deg, #E89AC7 0%, #D987BE 100%);
-  border-radius: 20px;
-  padding: 20px 25px;
   display: flex;
-  align-items: center;
   gap: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #E89AC7 0%, #D687B8 100%);
+  border-radius: 15px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 12px rgba(232, 154, 199, 0.2);
 }
 
-.search-input-wrapper {
+.search-box {
   flex: 1;
   display: flex;
-  gap: 10px;
-  align-items: center;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.laporan-search-input {
+.search-input {
   flex: 1;
-  padding: 10px 20px;
+  padding: 10px 15px;
   border: none;
-  border-radius: 20px;
-  background: white;
   font-size: 14px;
+  color: #333;
+}
+
+.search-input:focus {
   outline: none;
 }
 
-.btn-search-laporan {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
+.search-input::placeholder {
+  color: #999;
+}
+
+.btn-search-icon {
+  background: transparent;
   border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  padding: 10px 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.btn-search-laporan:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: scale(1.05);
-}
-
-.btn-download-laporan {
-  background: rgba(255, 255, 255, 0.3);
+.btn-download-excel {
+  background: #8B4869;
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
+  gap: 8px;
 }
 
-.btn-download-laporan:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: scale(1.05);
+.btn-download-excel:hover {
+  background: #7A3D5A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(139, 72, 105, 0.3);
 }
 
-/* ===== Laporan List Card ===== */
-.laporan-list-card {
-  background: linear-gradient(135deg, #E89AC7 0%, #D987BE 100%);
-  border-radius: 20px;
-  padding: 25px;
-  flex: 1;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.laporan-list-inner {
-  background: rgba(255, 255, 255, 0.25);
+/* ===== Bagian Data ===== */
+.laporan-data-section {
+  background: white;
   border-radius: 15px;
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-height: calc(100vh - 450px);
-  overflow-y: auto;
+  padding: 0;
+  min-height: 400px;
+  box-shadow: 0 4px 12px rgba(232, 154, 199, 0.2);
+  overflow: hidden;
 }
 
-.laporan-item {
-  background: linear-gradient(135deg, #D98BB8 0%, #C97AA7 100%);
-  border-radius: 25px;
-  padding: 18px 25px;
+.no-data-message {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.laporan-item:hover {
-  transform: translateX(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.laporan-item-text {
-  color: #fff;
-  font-size: 15px;
-  font-weight: 500;
-  flex: 1;
-}
-
-.laporan-empty-state {
+  justify-content: center;
+  min-height: 350px;
   text-align: center;
-  color: #666;
   padding: 60px 20px;
-  font-size: 15px;
 }
 
-/* ===== Scrollbar ===== */
-.laporan-list-inner::-webkit-scrollbar {
-  width: 8px;
+.no-data-message p {
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
 }
 
-.laporan-list-inner::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+/* ===== Container Tabel ===== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.laporan-list-inner::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
+.laporan-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.laporan-list-inner::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.7);
+.laporan-table thead {
+  background: linear-gradient(135deg, #E89AC7 0%, #C94C8B 100%);
 }
 
-/* ===== Responsive ===== */
+.laporan-table thead th {
+  padding: 15px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.laporan-table tbody tr {
+  border-bottom: 1px solid #F0F0F0;
+  transition: background-color 0.2s ease;
+}
+
+.laporan-table tbody tr:hover {
+  background: #FFF5FA;
+}
+
+.laporan-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.laporan-table tbody td {
+  padding: 15px;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+}
+
+.laporan-table tbody td:first-child {
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+}
+
+/* ===== Badge Layanan ===== */
+.service-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.badge-pink {
+  background: linear-gradient(135deg, #E89AC7 0%, #C94C8B 100%);
+}
+
+.badge-orange {
+  background: linear-gradient(135deg, #FFA07A 0%, #FF7F50 100%);
+}
+
+.badge-green {
+  background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+}
+
+.badge-blue {
+  background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+}
+
+/* ===== Responsif ===== */
 @media (max-width: 1024px) {
-  .laporan-filter-group {
-    grid-template-columns: 1fr 1fr;
+  .filter-tabs {
+    flex-wrap: wrap;
   }
 
-  .btn-filter-laporan {
-    grid-column: 1 / -1;
-    width: 100%;
+  .filter-tab {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 200px;
+  }
+
+  .btn-filter {
+    flex: 1 1 100%;
+  }
+
+  .table-container {
+    overflow-x: scroll;
+  }
+
+  .laporan-table {
+    min-width: 900px;
   }
 }
 
 @media (max-width: 768px) {
   .laporan-content {
     flex-direction: column;
-  }
-
-  .laporan-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 2px solid #e0e0e0;
   }
 
   .laporan-main-area {
@@ -409,15 +364,103 @@
     font-size: 18px;
   }
 
-  .laporan-filter-group {
-    grid-template-columns: 1fr;
+  .filter-tabs {
+    flex-direction: column;
+  }
+
+  .filter-tab {
+    flex: 1 1 100%;
   }
 
   .laporan-search-section {
     flex-direction: column;
   }
 
-  .search-input-wrapper {
-    width: 100%;
+  .table-container {
+    overflow-x: scroll;
+  }
+
+  .laporan-table {
+    min-width: 800px;
+  }
+}
+
+/* ===== Kartu Dashboard ===== */
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.dashboard-card {
+  flex: 1;
+  background: white;
+  border-radius: 15px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 12px rgba(232, 154, 199, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  min-height: 120px;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-card.card-pink {
+  border-left: 5px solid #E89AC7;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF0F5 100%);
+}
+
+.dashboard-card.card-purple {
+  border-left: 5px solid #9B6B9E;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5E6F7 100%);
+}
+
+.dashboard-card.card-blue {
+  border-left: 5px solid #87CEEB;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%);
+}
+
+.card-title {
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.card-value.small {
+  font-size: 24px;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Update service badge untuk tabel */
+.service-badge {
+  background: #E89AC7;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .dashboard-cards {
+    flex-direction: column;
   }
 }

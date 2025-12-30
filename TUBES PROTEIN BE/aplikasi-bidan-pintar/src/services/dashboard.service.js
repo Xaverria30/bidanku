@@ -1,15 +1,15 @@
 /**
- * Dashboard Service
- * Handles dashboard statistics and analytics
+ * Service Dashboard
+ * Menangani statistik dan analitik dashboard
  */
 
 const db = require('../config/database');
 const { VALID_LAYANAN } = require('../utils/constant');
 
 /**
- * Get service summary by category
- * @param {number} tahun - Year filter (optional)
- * @returns {Object} Summary with total and breakdown by service type
+ * Ambil ringkasan layanan berdasarkan kategori
+ * @param {number} tahun - Filter tahun (opsional)
+ * @returns {Object} Ringkasan dengan total dan rincian per layanan
  */
 const getRekapLayanan = async (tahun) => {
   const params = [VALID_LAYANAN];
@@ -31,10 +31,10 @@ const getRekapLayanan = async (tahun) => {
 
   const [rows] = await db.query(query, params);
 
-  // Calculate totals
+  // Hitung total kunjungan
   const totalKunjungan = rows.reduce((sum, row) => sum + row.jumlah_kunjungan, 0);
 
-  // Map to response format with percentages
+  // Map ke format respon dengan persentase
   const rekapData = rows.map((row) => ({
     layanan: row.jenis_layanan,
     jumlah_pasien: row.jumlah_kunjungan,

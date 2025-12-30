@@ -1,12 +1,12 @@
 /**
- * Email Utility
- * Handles sending emails using nodemailer
+ * Utilitas Email
+ * Menangani pengiriman email menggunakan nodemailer
  */
 
 const nodemailer = require('nodemailer');
 const { EMAIL_USER, EMAIL_PASS, OTP_EXPIRY_MINUTES } = require('./constant');
 
-// Create transporter (using Gmail by default)
+// Membuat transporter (menggunakan Gmail secara default)
 const createTransporter = () => {
   if (!EMAIL_USER || !EMAIL_PASS) {
     return null;
@@ -22,16 +22,16 @@ const createTransporter = () => {
 };
 
 /**
- * Send OTP code via email
- * @param {string} toEmail - Recipient email
- * @param {string} otpCode - OTP code to send
- * @returns {boolean} Success status
+ * Kirim kode OTP via email
+ * @param {string} toEmail - Email penerima
+ * @param {string} otpCode - Kode OTP yang akan dikirim
+ * @returns {boolean} Status keberhasilan
  */
 const sendOTP = async (toEmail, otpCode) => {
   const transporter = createTransporter();
 
   if (!transporter) {
-    throw new Error('Email configuration incomplete');
+    throw new Error('Konfigurasi email belum lengkap');
   }
 
   const mailOptions = {

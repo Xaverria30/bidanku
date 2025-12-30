@@ -1,12 +1,12 @@
 /**
- * Async Handler Wrapper
- * Wraps async route handlers to automatically catch errors
+ * Wrapper Async Handler
+ * Membungkus route handler async untuk menangkap error secara otomatis
  */
 
 /**
- * Wrap async function to catch errors and pass to error handler
- * @param {Function} fn - Async function to wrap
- * @returns {Function} Express middleware function
+ * Bungkus fungsi async untuk menangkap error dan meneruskannya ke error handler
+ * @param {Function} fn - Fungsi async yang akan dibungkus
+ * @returns {Function} Fungsi middleware Express
  */
 const asyncHandler = (fn) => {
   return (req, res, next) => {

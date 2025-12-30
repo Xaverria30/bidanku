@@ -1,12 +1,12 @@
 /**
- * Database Configuration
- * MySQL connection pool setup with promise support
+ * Konfigurasi Database
+ * Pengaturan koneksi pool MySQL dengan dukungan promise
  */
 
 const mysql = require('mysql2');
 require('dotenv').config();
 
-// Database configuration from environment variables
+// Konfigurasi database dari environment variables
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -17,34 +17,34 @@ const dbConfig = {
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT, 10) || 10,
   queueLimit: 0,
   timezone: '+00:00',
-  // Enable multiple statements for migrations/setup
+  // Mengaktifkan multiple statements untuk migrasi/setup
   multipleStatements: false,
-  // Better handling of dates
+  // Penanganan tanggal yang lebih baik
   dateStrings: true
 };
 
-// Create connection pool
+// Membuat connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Test connection on startup
+// Tes koneksi saat startup
 pool.getConnection((err, connection) => {
   if (err) {
-    console.error('❌ Database connection failed:', err.code);
-    console.error('   Message:', err.message);
-    
-    // Provide helpful error messages
+    console.error('❌ Koneksi database gagal:', err.code);
+    console.error('   Pesan:', err.message);
+
+    // Memberikan pesan error yang membantu
     if (err.code === 'ECONNREFUSED') {
-      console.error('   → Make sure MySQL server is running');
+      console.error('   → Pastikan server MySQL sudah berjalan');
     } else if (err.code === 'ER_ACCESS_DENIED_ERROR') {
-      console.error('   → Check your database credentials');
+      console.error('   → Periksa kredensial database Anda (username/password)');
     } else if (err.code === 'ER_BAD_DB_ERROR') {
-      console.error('   → Database does not exist');
+      console.error('   → Database tidak ditemukan');
     }
   } else {
-    console.log('✅ Connected to MySQL Database:', dbConfig.database);
+    console.log('✅ Terhubung ke Database MySQL:', dbConfig.database);
     connection.release();
   }
 });
 
-// Export promise-based pool for async/await support
+// Export promise-based pool untuk dukungan async/await
 module.exports = pool.promise();
