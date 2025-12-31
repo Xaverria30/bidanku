@@ -75,7 +75,7 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
   // Normalisasi nama field untuk konsistensi frontend
   const normalizedRows = rows.map(row => {
     // Normalisasi field nomor_registrasi berdasarkan jenis layanan
-    if (row.jenis_layanan === 'KB' && row.nomor_registrasi_baru) {
+    if (row.jenis_layanan === 'KB') {
       row.nomor_registrasi = row.nomor_registrasi_baru || row.nomor_registrasi_lama;
     } else if (row.jenis_layanan === 'ANC') {
       row.nomor_registrasi = row.no_reg_baru || row.no_reg_lama;

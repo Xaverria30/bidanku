@@ -8,6 +8,7 @@ import trashIcon from '../../assets/images/icons/icons8-trash-100.png';
 import layananService from '../../services/layanan.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
+import PilihPasienModal from '../shared/PilihPasienModal';
 
 function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
   const [error, setError] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
+  const [showPasienModal, setShowPasienModal] = useState(false);
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'ANC',
@@ -83,6 +85,28 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     }
 
     setFormData(prev => ({ ...prev, [name]: finalValue }));
+  };
+
+  const handlePasienSelect = (pasien) => {
+    setFormData(prev => ({
+      ...prev,
+      nama_istri: pasien.nama,
+      nik_istri: pasien.nik || pasien.NIK,
+      umur_istri: pasien.umur,
+      alamat: pasien.alamat,
+      no_hp: pasien.no_hp,
+      nama_suami: pasien.nama_suami || prev.nama_suami,
+      nik_suami: pasien.nik_suami || prev.nik_suami,
+      umur_suami: pasien.umur_suami || prev.umur_suami,
+    }));
+    setShowPasienModal(false);
+    showNotifikasi({
+      type: 'success',
+      message: 'Data Pasien Berhasil Dipilih!',
+      autoClose: true,
+      autoCloseDuration: 1500,
+      onConfirm: hideNotifikasi
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -478,7 +502,27 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
 
                 {/* Data Ibu */}
                 <div className="anc-form-section">
-                  <h3 className="anc-form-section-title">Data Ibu</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 className="anc-form-section-title" style={{ margin: 0 }}>Data Ibu</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasienModal(true)}
+                      style={{
+                        backgroundColor: '#e91e63',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>🔍</span> Cari Pasien
+                    </button>
+                  </div>
 
                   <div className="anc-form-row">
                     <div className="anc-form-group">
@@ -676,6 +720,12 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
         cancelText={notifikasi.cancelText}
         autoClose={notifikasi.autoClose}
         autoCloseDuration={notifikasi.autoCloseDuration}
+      />
+
+      <PilihPasienModal
+        show={showPasienModal}
+        onClose={() => setShowPasienModal(false)}
+        onSelect={handlePasienSelect}
       />
     </div>
   );

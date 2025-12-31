@@ -18,7 +18,7 @@ export const getPemeriksaanByLayanan = async (jenisLayanan, search = '') => {
   const params = new URLSearchParams();
   if (jenisLayanan) params.append('jenis_layanan', jenisLayanan);
   if (search) params.append('search', search);
-  
+
   const query = params.toString() ? `?${params.toString()}` : '';
   return apiRequest(`/pemeriksaan${query}`);
 };
@@ -176,30 +176,32 @@ export const createImunisasi = async (data) => {
     tanggal: data.tanggal,
     no_reg: data.no_reg || data.nomor_registrasi,
     jenis_imunisasi: data.jenis_imunisasi,
-    
+
     // Map ibu fields
     nama_istri: data.nama_istri || data.nama_ibu,
     nik_istri: data.nik_istri || data.nik_ibu,
     umur_istri: data.umur_istri || data.umur_ibu,
     alamat: data.alamat || data.alamat_ibu,
-    
+
     // Map ayah fields
     nama_suami: data.nama_suami || data.nama_ayah,
     nik_suami: data.nik_suami || data.nik_ayah,
     umur_suami: data.umur_suami || data.umur_ayah,
-    
+
     // Map bayi fields
     nama_bayi_balita: data.nama_bayi_balita || data.nama_bayi,
     tanggal_lahir_bayi: data.tanggal_lahir_bayi || data.tanggal_lahir,
     tb_bayi: data.tb_bayi || data.tb,
     bb_bayi: data.bb_bayi || data.bb,
-    
+
     // Map other fields
     jadwal_selanjutnya: data.jadwal_selanjutnya,
+    jam_jadwal_selanjutnya: data.jam_jadwal_selanjutnya,
+    jam_jadwal_selanjutnya_selesai: data.jam_jadwal_selanjutnya_selesai,
     no_hp: data.no_hp || data.nomor_hp,
     pengobatan: data.pengobatan,
   };
-  
+
   return apiRequest('/imunisasi', {
     method: 'POST',
     body: mappedData,
@@ -228,33 +230,35 @@ export const updateImunisasi = async (id, data) => {
     tanggal: data.tanggal,
     no_reg: data.no_reg || data.nomor_registrasi,
     jenis_imunisasi: data.jenis_imunisasi,
-    
+
     // Map ibu fields
     nama_istri: data.nama_istri || data.nama_ibu,
     nik_istri: data.nik_istri || data.nik_ibu,
     umur_istri: data.umur_istri || data.umur_ibu,
     alamat: data.alamat || data.alamat_ibu,
-    
+
     // Map ayah fields
     nama_suami: data.nama_suami || data.nama_ayah,
     nik_suami: data.nik_suami || data.nik_ayah,
     umur_suami: data.umur_suami || data.umur_ayah,
-    
+
     // Map bayi fields
     nama_bayi_balita: data.nama_bayi_balita || data.nama_bayi,
     tanggal_lahir_bayi: data.tanggal_lahir_bayi || data.tanggal_lahir,
     tb_bayi: data.tb_bayi || data.tb,
     bb_bayi: data.bb_bayi || data.bb,
-    
+
     // Map other fields
     jadwal_selanjutnya: data.jadwal_selanjutnya,
+    jam_jadwal_selanjutnya: data.jam_jadwal_selanjutnya,
+    jam_jadwal_selanjutnya_selesai: data.jam_jadwal_selanjutnya_selesai,
     no_hp: data.no_hp || data.nomor_hp,
     pengobatan: data.pengobatan,
   };
-  
+
   console.log('UPDATE Imunisasi - Original data:', data);
   console.log('UPDATE Imunisasi - Mapped data:', mappedData);
-  
+
   return apiRequest(`/imunisasi/${id}`, {
     method: 'PUT',
     body: mappedData,

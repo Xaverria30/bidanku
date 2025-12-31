@@ -147,7 +147,7 @@ const getImunisasiById = async (id_pemeriksaan) => {
     FROM pemeriksaan p
     LEFT JOIN layanan_imunisasi im ON p.id_pemeriksaan = im.id_pemeriksaan
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
-    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'Imunisasi'
+    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'Imunisasi' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
   return rows[0] || null;
@@ -168,13 +168,14 @@ const getAllImunisasi = async (search = '') => {
       pas.nama,
       pas.nik,
       im.nama_bayi_balita,
+      im.tanggal_lahir_bayi,
       im.jenis_imunisasi,
       im.no_reg,
       im.no_reg as nomor_registrasi
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_imunisasi im ON p.id_pemeriksaan = im.id_pemeriksaan
-    WHERE p.jenis_layanan = 'Imunisasi'
+    WHERE p.jenis_layanan = 'Imunisasi' AND p.deleted_at IS NULL AND pas.deleted_at IS NULL
   `;
 
   const params = [];
@@ -308,33 +309,17 @@ const deleteRegistrasiImunisasi = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();
 
   try {
-    await connection.beginTransaction();
-
-    const [imunisasi] = await connection.query(
-      'SELECT id_imunisasi FROM layanan_imunisasi WHERE id_pemeriksaan = ?',
+    const [result] = await connection.query(
+      'UPDATE pemeriksaan SET deleted_at = NOW() WHERE id_pemeriksaan = ?',
       [id_pemeriksaan]
     );
 
-    if (imunisasi.length === 0) {
-      throw new Error('Data Imunisasi tidak ditemukan');
+    if (result.affectedRows > 0) {
+      await auditService.recordDataLog(userId, 'DELETE', 'layanan_imunisasi', id_pemeriksaan);
     }
-
-    await connection.query(
-      'DELETE FROM layanan_imunisasi WHERE id_pemeriksaan = ?',
-      [id_pemeriksaan]
-    );
-
-    await connection.query(
-      'DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?',
-      [id_pemeriksaan]
-    );
-
-    await connection.commit();
-    await auditService.recordDataLog(userId, 'DELETE', 'layanan_imunisasi', imunisasi[0].id_imunisasi);
 
     return { message: 'Data Imunisasi berhasil dihapus' };
   } catch (error) {
-    await connection.rollback();
     throw error;
   } finally {
     connection.release();

@@ -8,6 +8,7 @@ import trashIcon from '../../assets/images/icons/icons8-trash-100.png';
 import layananService from '../../services/layanan.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
+import PilihPasienModal from '../shared/PilihPasienModal';
 
 function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
   const [error, setError] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
+  const [showPasienModal, setShowPasienModal] = useState(false);
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'Imunisasi',
@@ -53,8 +55,10 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       if (response.success && response.data) {
         const mappedData = response.data.map(item => ({
           id: item.id_pemeriksaan,
-          nama_pasien: item.nama_pasien || 'Pasien',
-          tanggal: item.tanggal_pemeriksaan,
+          nama_pasien: item.nama_pasien || item.nama || 'Pasien',
+          // Backend /api/imunisasi returns 'tanggal' as DD/MM/YYYY string
+          // Backend /api/pemeriksaan returns 'tanggal_pemeriksaan' as ISO string
+          tanggal: item.tanggal || item.tanggal_pemeriksaan,
           jenis_layanan: item.jenis_layanan
         }));
         setRiwayatPelayanan(mappedData);
@@ -79,8 +83,31 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
     console.log(`Input changed: ${name} = ${value}`);
     setFormData(prev => {
       const updated = { ...prev, [name]: value };
+
       console.log('Updated formData:', updated);
       return updated;
+    });
+  };
+
+  const handlePasienSelect = (pasien) => {
+    setFormData(prev => ({
+      ...prev,
+      nama_ibu: pasien.nama,
+      nik_ibu: pasien.nik || pasien.NIK,
+      umur_ibu: pasien.umur,
+      alamat_ibu: pasien.alamat,
+      nomor_hp: pasien.no_hp,
+      nama_ayah: pasien.nama_suami || prev.nama_ayah,
+      nik_ayah: pasien.nik_suami || prev.nik_ayah,
+      umur_ayah: pasien.umur_suami || prev.umur_ayah,
+    }));
+    setShowPasienModal(false);
+    showNotifikasi({
+      type: 'success',
+      message: 'Data Pasien Berhasil Dipilih!',
+      autoClose: true,
+      autoCloseDuration: 1500,
+      onConfirm: hideNotifikasi
     });
   };
 
@@ -95,6 +122,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       });
       return;
     }
+    // ... rest of validation ...
 
     // Validasi NIK
     if (formData.nik_ibu && formData.nik_ibu.length !== 16) {
@@ -383,7 +411,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                     riwayatPelayanan.map((item) => (
                       <div key={item.id} className="imunisasi-riwayat-item">
                         <span className="imunisasi-riwayat-text">
-                          {item.nama_pasien} - {new Date(item.tanggal).toLocaleDateString('id-ID')}
+                          {item.nama_pasien} - {item.tanggal && item.tanggal.includes('/') ? item.tanggal : new Date(item.tanggal).toLocaleDateString('id-ID')}
                         </span>
                         <div className="imunisasi-riwayat-actions">
                           <button className="imunisasi-btn-edit" onClick={() => handleEdit(item.id)}>
@@ -472,7 +500,27 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
 
                 {/* Data Ibu */}
                 <div className="imunisasi-form-section">
-                  <h3 className="imunisasi-form-section-title">Data Ibu</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 className="imunisasi-form-section-title" style={{ margin: 0 }}>Data Ibu</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasienModal(true)}
+                      style={{
+                        backgroundColor: '#e91e63',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>🔍</span> Cari Pasien
+                    </button>
+                  </div>
 
                   <div className="imunisasi-form-row">
                     <div className="imunisasi-form-group">
@@ -572,6 +620,10 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                 {/* Data Bayi/Balita */}
                 <div className="imunisasi-form-section">
                   <h3 className="imunisasi-form-section-title">Data Bayi/Balita</h3>
+
+                  <div className="imunisasi-form-row">
+
+                  </div>
 
                   <div className="imunisasi-form-row">
                     <div className="imunisasi-form-group">
@@ -703,6 +755,12 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
         cancelText={notifikasi.cancelText}
         autoClose={notifikasi.autoClose}
         autoCloseDuration={notifikasi.autoCloseDuration}
+      />
+
+      <PilihPasienModal
+        show={showPasienModal}
+        onClose={() => setShowPasienModal(false)}
+        onSelect={handlePasienSelect}
       />
     </div>
   );

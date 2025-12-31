@@ -4,11 +4,11 @@ import './DataPasien.css';
 import pinkLogo from '../../assets/images/pink-logo.png';
 import pasienService from '../../services/pasien.service';
 
-function DataPasien({ 
-  onBack, 
-  onToRiwayatDataMasuk, 
-  onToRiwayatMasukAkun, 
-  onToProfil, 
+function DataPasien({
+  onBack,
+  onToRiwayatDataMasuk,
+  onToRiwayatMasukAkun,
+  onToProfil,
   onToEditPasien,
   onToTambahPasien,
   onToTambahPengunjung,
@@ -16,7 +16,8 @@ function DataPasien({
   onToPersalinan,
   onToANC,
   onToKB,
-  onToImunisasi
+  onToImunisasi,
+  onToDataSampah
 }) {
   const [pasienList, setPasienList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,10 +86,29 @@ function DataPasien({
           </div>
           <h1 className="dp-header-title">Data Pasien (Keseluruhan)</h1>
         </div>
-        <button className="btn-kembali-dp" onClick={onBack}>Kembali</button>
+        <div className="dp-header-right" style={{ display: 'flex', gap: '10px' }}>
+          <button
+            className="btn-tambah-pasien"
+            onClick={onToTambahPasien}
+            style={{ backgroundColor: '#2196f3', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Tambah Pasien
+          </button>
+          <button
+            className="btn-kembali-dp"
+            onClick={onToDataSampah}
+            style={{ backgroundColor: '#ff9800' }}
+          >
+            Sampah ({window.location.hash === '#deleted' ? 'Active' : 'Recovery'})
+          </button>
+          <button className="btn-kembali-dp" onClick={onBack}>Kembali</button>
+        </div>
       </div>
 
-      {/* Main Content */}
+      {/* Konten Utama */}
       <div className="data-pasien-content">
         {/* Sidebar */}
         <Sidebar
@@ -105,15 +125,15 @@ function DataPasien({
           onToImunisasi={onToImunisasi}
         />
 
-        {/* Main Area */}
+        {/* Area Utama */}
         <main className="dp-main-area">
           <div className="dp-card">
             <div className="dp-card-header">
               <h2 className="dp-card-title">Data Pasien</h2>
             </div>
-            
+
             <div className="dp-card-body">
-              {/* Search Box */}
+              {/* Kotak Pencarian */}
               <div className="dp-search-container">
                 <input
                   type="text"
@@ -123,47 +143,47 @@ function DataPasien({
                   onChange={handleSearch}
                 />
                 <div className="dp-filter-wrapper">
-                  <button 
+                  <button
                     className="dp-filter-btn"
                     onClick={() => setShowFilterDropdown(!showFilterDropdown)}
                   >
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-                      <path d="M2 4h16M5 9h10M8 14h4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M2 4h16M5 9h10M8 14h4" stroke="white" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                   </button>
                   {showFilterDropdown && (
                     <div className="dp-filter-dropdown">
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'semua' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('semua')}
                       >
                         Semua Layanan
                       </div>
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'kb' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('kb')}
                       >
                         Layanan KB
                       </div>
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'persalinan' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('persalinan')}
                       >
                         Layanan Persalinan
                       </div>
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'anc' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('anc')}
                       >
                         Layanan ANC
                       </div>
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'imunisasi' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('imunisasi')}
                       >
                         Layanan Imunisasi
                       </div>
-                      <div 
+                      <div
                         className={`dp-filter-option ${selectedFilter === 'kunjungan' ? 'active' : ''}`}
                         onClick={() => handleFilterSelect('kunjungan')}
                       >
@@ -174,7 +194,7 @@ function DataPasien({
                 </div>
               </div>
 
-              {/* Patient List */}
+              {/* Daftar Pasien */}
               <div className="dp-patient-list">
                 {isLoading ? (
                   <div className="dp-loading">Memuat data...</div>
@@ -183,22 +203,22 @@ function DataPasien({
                     <div key={pasien.id_pasien} className="dp-patient-item">
                       <span className="dp-patient-name">{pasien.nama}</span>
                       <div className="dp-patient-actions">
-                        <button 
+                        <button
                           className="dp-btn-edit"
                           onClick={() => handleEdit(pasien.id_pasien)}
                           title="Edit"
                         >
                           <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
-                            <path d="M12.5 2.5L15.5 5.5M1 17L4.5 16.5L16 5C16.5 4.5 16.5 3.5 16 3L15 2C14.5 1.5 13.5 1.5 13 2L1.5 13.5L1 17Z" stroke="white" strokeWidth="1.5" fill="none"/>
+                            <path d="M12.5 2.5L15.5 5.5M1 17L4.5 16.5L16 5C16.5 4.5 16.5 3.5 16 3L15 2C14.5 1.5 13.5 1.5 13 2L1.5 13.5L1 17Z" stroke="white" strokeWidth="1.5" fill="none" />
                           </svg>
                         </button>
-                        <button 
+                        <button
                           className="dp-btn-delete"
                           onClick={() => handleDelete(pasien.id_pasien)}
                           title="Hapus"
                         >
                           <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
-                            <path d="M3 5h12M7 3h4M7 8v6M11 8v6M5 5l1 11h6l1-11" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M3 5h12M7 3h4M7 8v6M11 8v6M5 5l1 11h6l1-11" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
                           </svg>
                         </button>
                       </div>
