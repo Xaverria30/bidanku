@@ -8,6 +8,7 @@ import trashIcon from '../../assets/images/icons/icons8-trash-100.png';
 import layananService from '../../services/layanan.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
+import PilihPasienModal from '../shared/PilihPasienModal';
 
 function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
   const [error, setError] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
+  const [showPasienModal, setShowPasienModal] = useState(false);
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'KB',
@@ -81,6 +83,28 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePasienSelect = (pasien) => {
+    setFormData(prev => ({
+      ...prev,
+      nama_ibu: pasien.nama,
+      nik_ibu: pasien.nik || pasien.NIK,
+      umur_ibu: pasien.umur,
+      alamat: pasien.alamat,
+      nomor_hp: pasien.no_hp,
+      nama_ayah: pasien.nama_suami || prev.nama_ayah,
+      nik_ayah: pasien.nik_suami || prev.nik_ayah,
+      umur_ayah: pasien.umur_suami || prev.umur_ayah,
+    }));
+    setShowPasienModal(false);
+    showNotifikasi({
+      type: 'success',
+      message: 'Data Pasien Berhasil Dipilih!',
+      autoClose: true,
+      autoCloseDuration: 1500,
+      onConfirm: hideNotifikasi
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Validate required fields
@@ -109,6 +133,18 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
         message: 'NIK Ayah harus 16 digit!',
         onConfirm: hideNotifikasi
       });
+      // Validasi Khusus Metode Pria
+      if (formData.metode === 'MOP (Vasektomi)' || formData.metode === 'Kondom') {
+        if (!formData.td_ayah || !formData.bb_ayah) {
+          showNotifikasi({
+            type: 'error',
+            message: 'Data Suami (TD & BB) wajib diisi untuk layanan ini!',
+            onConfirm: hideNotifikasi
+          });
+          return;
+        }
+      }
+
       return;
     }
 
@@ -499,7 +535,27 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
 
                 {/* Data Ibu */}
                 <div className="kb-form-section">
-                  <h3 className="kb-form-section-title">Data Ibu</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 className="kb-form-section-title" style={{ margin: 0 }}>Data Ibu</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasienModal(true)}
+                      style={{
+                        backgroundColor: '#e91e63',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>🔍</span> Cari Pasien
+                    </button>
+                  </div>
 
                   <div className="kb-form-row">
                     <div className="kb-form-group full-width">
@@ -736,6 +792,12 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
         cancelText={notifikasi.cancelText}
         autoClose={notifikasi.autoClose}
         autoCloseDuration={notifikasi.autoCloseDuration}
+      />
+
+      <PilihPasienModal
+        show={showPasienModal}
+        onClose={() => setShowPasienModal(false)}
+        onSelect={handlePasienSelect}
       />
     </div>
   );

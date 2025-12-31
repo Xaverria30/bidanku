@@ -1,13 +1,13 @@
 /**
- * Patient Controller
- * Handles HTTP requests for patient management
+ * Controller Pasien
+ * Menangani request HTTP untuk manajemen pasien
  */
 
 const pasienService = require('../services/pasien.service');
 const { success, created, notFound, badRequest, serverError } = require('../utils/response');
 
 /**
- * Get all patients
+ * Ambil semua data pasien
  * GET /api/pasien
  */
 const getAllPasien = async (req, res) => {
@@ -21,7 +21,7 @@ const getAllPasien = async (req, res) => {
 };
 
 /**
- * Get patient by ID
+ * Ambil data pasien berdasarkan ID
  * GET /api/pasien/:id
  */
 const getPasienById = async (req, res) => {
@@ -40,7 +40,7 @@ const getPasienById = async (req, res) => {
 };
 
 /**
- * Create new patient
+ * Buat data pasien baru
  * POST /api/pasien
  */
 const createPasien = async (req, res) => {
@@ -57,7 +57,7 @@ const createPasien = async (req, res) => {
 };
 
 /**
- * Update patient
+ * Update data pasien
  * PUT /api/pasien/:id
  */
 const updatePasien = async (req, res) => {
@@ -65,7 +65,7 @@ const updatePasien = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Check if patient exists
+    // Cek apakah pasien ada
     const existingPasien = await pasienService.getPasienById(id);
     if (!existingPasien) {
       return notFound(res, 'Pasien tidak ditemukan');
@@ -82,7 +82,7 @@ const updatePasien = async (req, res) => {
 };
 
 /**
- * Delete patient
+ * Hapus data pasien (Soft Delete)
  * DELETE /api/pasien/:id
  */
 const deletePasien = async (req, res) => {
@@ -103,14 +103,14 @@ const deletePasien = async (req, res) => {
 };
 
 /**
- * Get patient examination history
+ * Ambil riwayat pemeriksaan pasien
  * GET /api/pasien/:id/riwayat
  */
 const getRiwayatPasien = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if patient exists
+    // Cek apakah pasien ada
     const existingPasien = await pasienService.getPasienById(id);
     if (!existingPasien) {
       return notFound(res, 'Pasien tidak ditemukan');
@@ -123,11 +123,50 @@ const getRiwayatPasien = async (req, res) => {
   }
 };
 
+/**
+ * Ambil pasien yang dihapus
+ * GET /api/pasien/deleted
+ */
+const getDeletedPasien = async (req, res) => {
+  try {
+    const { search } = req.query;
+    const data = await pasienService.getDeletedPasien(search);
+    return success(res, 'Berhasil mengambil data pasien yang dihapus', data);
+  } catch (error) {
+    return serverError(res, 'Gagal mengambil data pasien yang dihapus', error);
+  }
+};
+
+/**
+ * Pulihkan pasien (Restore)
+ * PUT /api/pasien/:id/restore
+ */
+const restorePasien = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Cek apakah pasien ada (meskipun dihapus) - kita perlu cara untuk cek by ID tanpa peduli status penghapusan
+    // ATAU coba restore saja dan cek affectedRows
+    const result = await pasienService.restorePasien(id, userId);
+
+    if (result.affectedRows === 0) {
+      return notFound(res, 'Pasien tidak ditemukan atau belum dihapus');
+    }
+
+    return success(res, 'Pasien berhasil dipulihkan');
+  } catch (error) {
+    return serverError(res, 'Gagal memulihkan pasien', error);
+  }
+};
+
 module.exports = {
   getAllPasien,
   getPasienById,
   createPasien,
   updatePasien,
   deletePasien,
-  getRiwayatPasien
+  getRiwayatPasien,
+  getDeletedPasien,
+  restorePasien
 };

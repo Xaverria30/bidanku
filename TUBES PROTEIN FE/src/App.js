@@ -12,6 +12,8 @@ import ProfilSaya from './components/profil/ProfilSaya';
 import InformasiPengguna from './components/profil/InformasiPengguna';
 import UbahPassword from './components/profil/UbahPassword';
 import DataPasien from './components/pasien/DataPasien';
+import TambahPasien from './components/pasien/TambahPasien';
+import DataSampah from './components/pasien/DataSampah';
 import EditPasien from './components/pasien/EditPasien';
 import RiwayatUbahDataPasien from './components/pasien/RiwayatUbahData';
 import RiwayatMasukAkun from './components/profil/RiwayatMasukAkun';
@@ -31,7 +33,6 @@ import { getToken, getStoredUser, clearAuth } from './services/api';
 
 function App() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +91,6 @@ function App() {
   const handleToUbahPassword = () => navigate('/ubah-password');
   const handleToDataPasien = () => navigate('/data-pasien');
   const handleToRiwayatDataMasuk = () => navigate('/riwayat-data-masuk');
-  const handleToRiwayatUbahData = () => navigate('/riwayat-ubah-data');
   const handleToRiwayatMasukAkun = () => navigate('/riwayat-masuk-akun');
   const handleToJadwal = () => navigate('/jadwal');
   const handleToBuatJadwal = () => navigate('/buat-jadwal');
@@ -101,8 +101,10 @@ function App() {
   const handleToANC = () => navigate('/anc');
   const handleToImunisasi = () => navigate('/imunisasi');
   const handleToKunjunganPasien = () => navigate('/kunjungan-pasien');
+  const handleToDataSampah = () => navigate('/data-sampah');
   const handleBackToDashboard = () => navigate('/dashboard');
   const handleBackFromBuatJadwal = () => navigate(-1);
+  const handleToTambahPasien = () => navigate('/tambah-pasien');
 
   const handleToVerifikasiOTP = (email) => {
     setResetEmail(email);
@@ -130,10 +132,6 @@ function App() {
         }
       });
     }
-  };
-
-  const handleToTambahPasien = () => {
-    navigate('/data-pasien#tambahPasien');
   };
 
   const handleToEditPasien = (pasienId) => {
@@ -292,6 +290,43 @@ function App() {
                 onToProfil={handleToProfil}
                 onToTambahPasien={handleToTambahPasien}
                 onToEditPasien={handleToEditPasien}
+                onToTambahPengunjung={handleToTambahPengunjung}
+                onToBuatLaporan={handleToBuatLaporan}
+                onToPersalinan={handleToPersalinan}
+                onToANC={handleToANC}
+                onToKB={handleToKB}
+                onToImunisasi={handleToImunisasi}
+                onToDataSampah={handleToDataSampah}
+              />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/tambah-pasien" element={
+            <ProtectedRoute>
+              <TambahPasien
+                onBack={handleToDataPasien}
+                onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+                onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+                onToProfil={handleToProfil}
+                onToTambahPasien={handleToTambahPasien}
+                onToTambahPengunjung={handleToTambahPengunjung}
+                onToBuatLaporan={handleToBuatLaporan}
+                onToPersalinan={handleToPersalinan}
+                onToANC={handleToANC}
+                onToKB={handleToKB}
+                onToImunisasi={handleToImunisasi}
+              />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/data-sampah" element={
+            <ProtectedRoute>
+              <DataSampah
+                onBack={handleToDataPasien}
+                onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
+                onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+                onToProfil={handleToProfil}
+                onToTambahPasien={handleToTambahPasien}
                 onToTambahPengunjung={handleToTambahPengunjung}
                 onToBuatLaporan={handleToBuatLaporan}
                 onToPersalinan={handleToPersalinan}

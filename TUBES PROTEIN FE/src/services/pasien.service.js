@@ -1,13 +1,13 @@
 /**
- * Pasien Service - Patient management API calls
+ * Service Pasien - Panggilan API manajemen pasien
  */
 
 import { apiRequest } from './api';
 
 /**
- * Get all patients with optional search
- * @param {string} search - Search by name or NIK
- * @returns {Promise<object>} Response data with patients list
+ * Ambil semua pasien dengan pencarian opsional
+ * @param {string} search - Cari berdasarkan nama atau NIK
+ * @returns {Promise<object>} Data respons dengan daftar pasien
  */
 export const getAllPasien = async (search = '') => {
   const query = search ? `?search=${encodeURIComponent(search)}` : '';
@@ -15,18 +15,18 @@ export const getAllPasien = async (search = '') => {
 };
 
 /**
- * Get patient by ID
- * @param {string} id - Patient ID (UUID)
- * @returns {Promise<object>} Response data with patient details
+ * Ambil pasien berdasarkan ID
+ * @param {string} id - ID Pasien (UUID)
+ * @returns {Promise<object>} Data respons dengan detail pasien
  */
 export const getPasienById = async (id) => {
   return apiRequest(`/pasien/${id}`);
 };
 
 /**
- * Create new patient
+ * Buat pasien baru
  * @param {object} data - { nama, NIK, umur, alamat, no_hp }
- * @returns {Promise<object>} Response data with created patient
+ * @returns {Promise<object>} Data respons dengan pasien yang dibuat
  */
 export const createPasien = async (data) => {
   return apiRequest('/pasien', {
@@ -36,10 +36,10 @@ export const createPasien = async (data) => {
 };
 
 /**
- * Update patient
- * @param {string} id - Patient ID (UUID)
+ * Update data pasien
+ * @param {string} id - ID Pasien (UUID)
  * @param {object} data - { nama, NIK, umur, alamat, no_hp }
- * @returns {Promise<object>} Response data with updated patient
+ * @returns {Promise<object>} Data respons dengan pasien yang diperbarui
  */
 export const updatePasien = async (id, data) => {
   return apiRequest(`/pasien/${id}`, {
@@ -49,9 +49,9 @@ export const updatePasien = async (id, data) => {
 };
 
 /**
- * Delete patient
- * @param {string} id - Patient ID (UUID)
- * @returns {Promise<object>} Response data
+ * Hapus pasien
+ * @param {string} id - ID Pasien (UUID)
+ * @returns {Promise<object>} Data respons
  */
 export const deletePasien = async (id) => {
   return apiRequest(`/pasien/${id}`, {
@@ -60,12 +60,33 @@ export const deletePasien = async (id) => {
 };
 
 /**
- * Get patient medical history
- * @param {string} id - Patient ID (UUID)
- * @returns {Promise<object>} Response data with medical history
+ * Ambil riwayat medis pasien
+ * @param {string} id - ID Pasien (UUID)
+ * @returns {Promise<object>} Data respons dengan riwayat medis
  */
 export const getRiwayatPasien = async (id) => {
   return apiRequest(`/pasien/${id}/riwayat`);
+};
+
+/**
+ * Ambil pasien yang dihapus (Data Sampah)
+ * @param {string} search - Query pencarian
+ * @returns {Promise<object>} Data respons
+ */
+export const getDeletedPasien = async (search = '') => {
+  const query = search ? `?search=${encodeURIComponent(search)}` : '';
+  return apiRequest(`/pasien/deleted${query}`);
+};
+
+/**
+ * Pulihkan pasien
+ * @param {string} id - ID Pasien
+ * @returns {Promise<object>} Data respons
+ */
+export const restorePasien = async (id) => {
+  return apiRequest(`/pasien/${id}/restore`, {
+    method: 'PUT',
+  });
 };
 
 export default {
@@ -75,4 +96,6 @@ export default {
   updatePasien,
   deletePasien,
   getRiwayatPasien,
+  getDeletedPasien,
+  restorePasien,
 };

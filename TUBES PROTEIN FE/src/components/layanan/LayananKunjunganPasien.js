@@ -8,13 +8,14 @@ import trashIcon from '../../assets/images/icons/icons8-trash-100.png';
 import layananService from '../../services/layanan.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
+import PilihPasienModal from '../shared/PilihPasienModal';
 
 function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [editingId, setEditingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
+  const [showPasienModal, setShowPasienModal] = useState(false);
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'Kunjungan Pasien',
@@ -42,6 +43,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
 
   useEffect(() => {
     fetchRiwayatPelayanan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchRiwayatPelayanan = async (search = '') => {
@@ -104,6 +106,24 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
     });
   };
 
+  const handlePasienSelect = (pasien) => {
+    setFormData(prev => ({
+      ...prev,
+      nama_pasien: pasien.nama,
+      nik_pasien: pasien.nik || pasien.NIK,
+      umur_pasien: pasien.umur,
+      alamat: pasien.alamat // Map other fields if needed
+    }));
+    setShowPasienModal(false);
+    showNotifikasi({
+      type: 'success',
+      message: 'Data Pasien Berhasil Dipilih!',
+      autoClose: true,
+      autoCloseDuration: 1500,
+      onConfirm: hideNotifikasi
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -141,7 +161,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
       onConfirm: async () => {
         hideNotifikasi();
         setIsLoading(true);
-        setError('');
+        setIsLoading(true);
 
         try {
           let response;
@@ -166,7 +186,6 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
         } catch (error) {
           console.error('Error:', error);
           const errorMessage = error.response?.data?.message || error.message || 'Terjadi kesalahan saat menyimpan data';
-          setError(errorMessage);
           showNotifikasi({
             type: 'error',
             message: errorMessage,
@@ -208,7 +227,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
       keterangan: ''
     });
     setShowForm(false);
-    setError('');
+    setShowForm(false);
   };
 
   const handleEdit = async (item) => {
@@ -291,9 +310,6 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
           }
         } catch (error) {
           console.error('❌ Error deleting:', error);
-          console.error('   Error type:', error.type);
-          console.error('   Error status:', error.status);
-          console.error('   Error data:', error.data);
           showNotifikasi({
             type: 'error',
             message: error.message || 'Gagal menghapus data',
@@ -494,7 +510,27 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
 
                 {/* Data Pasien */}
                 <div className="kunjungan-form-section">
-                  <h3 className="kunjungan-form-section-title">Data Pasien</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 className="kunjungan-form-section-title" style={{ margin: 0 }}>Data Pasien</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasienModal(true)}
+                      style={{
+                        backgroundColor: '#e91e63',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>🔍</span> Cari Pasien
+                    </button>
+                  </div>
                   <div className="kunjungan-form-row">
                     <div className="kunjungan-form-group">
                       <label>Nama Pasien</label>
@@ -519,8 +555,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                         pattern="[0-9]{16}"
                         title="NIK harus 16 digit angka"
                         required
-                      />
-                      {formData.nik_pasien && formData.nik_pasien.length < 16 && (
+                      />{formData.nik_pasien && formData.nik_pasien.length < 16 && (
                         <small style={{ color: 'red', fontSize: '12px' }}>NIK harus 16 digit ({formData.nik_pasien.length}/16)</small>
                       )}
                     </div>
@@ -678,6 +713,12 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
         onCancel={notifikasi.onCancel}
         autoClose={notifikasi.autoClose}
         autoCloseDuration={notifikasi.autoCloseDuration}
+      />
+
+      <PilihPasienModal
+        show={showPasienModal}
+        onClose={() => setShowPasienModal(false)}
+        onSelect={handlePasienSelect}
       />
     </div>
   );

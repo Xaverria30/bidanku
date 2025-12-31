@@ -157,7 +157,7 @@ const getPersalinanById = async (id_pemeriksaan) => {
     FROM pemeriksaan p
     LEFT JOIN layanan_persalinan pers ON p.id_pemeriksaan = pers.id_pemeriksaan
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
-    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'Persalinan'
+    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'Persalinan' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
 
@@ -202,7 +202,7 @@ const getAllPersalinan = async (search = '') => {
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_persalinan pers ON p.id_pemeriksaan = pers.id_pemeriksaan
-    WHERE p.jenis_layanan = 'Persalinan'
+    WHERE p.jenis_layanan = 'Persalinan' AND p.deleted_at IS NULL AND pas.deleted_at IS NULL
   `;
 
   const params = [];
@@ -327,33 +327,17 @@ const deleteRegistrasiPersalinan = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();
 
   try {
-    await connection.beginTransaction();
-
-    const [persalinan] = await connection.query(
-      'SELECT id_persalinan FROM layanan_persalinan WHERE id_pemeriksaan = ?',
+    const [result] = await connection.query(
+      'UPDATE pemeriksaan SET deleted_at = NOW() WHERE id_pemeriksaan = ?',
       [id_pemeriksaan]
     );
 
-    if (persalinan.length === 0) {
-      throw new Error('Data Persalinan tidak ditemukan');
+    if (result.affectedRows > 0) {
+      await auditService.recordDataLog(userId, 'DELETE', 'layanan_persalinan', id_pemeriksaan);
     }
-
-    await connection.query(
-      'DELETE FROM layanan_persalinan WHERE id_pemeriksaan = ?',
-      [id_pemeriksaan]
-    );
-
-    await connection.query(
-      'DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?',
-      [id_pemeriksaan]
-    );
-
-    await connection.commit();
-    await auditService.recordDataLog(userId, 'DELETE', 'layanan_persalinan', persalinan[0].id_persalinan);
 
     return { message: 'Data Persalinan berhasil dihapus' };
   } catch (error) {
-    await connection.rollback();
     throw error;
   } finally {
     connection.release();

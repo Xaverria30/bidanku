@@ -29,12 +29,13 @@ const getAllKunjunganPasien = async (search = '') => {
         p.tanggal_pemeriksaan
       FROM layanan_kunjungan_pasien k
       LEFT JOIN pemeriksaan p ON k.id_pemeriksaan = p.id_pemeriksaan
+      WHERE p.deleted_at IS NULL
     `;
 
     let params = [];
 
     if (search) {
-      query += ' WHERE k.nama_pasien LIKE ?';
+      query += ' AND k.nama_pasien LIKE ?';
       params.push(`%${search}%`);
     }
 
@@ -61,7 +62,8 @@ const getKunjunganPasienById = async (id) => {
         k.*,
         'Kunjungan Pasien' as jenis_layanan
       FROM layanan_kunjungan_pasien k
-      WHERE k.id_kunjungan = ?`,
+      LEFT JOIN pemeriksaan p ON k.id_pemeriksaan = p.id_pemeriksaan
+      WHERE k.id_kunjungan = ? AND p.deleted_at IS NULL`,
       [id]
     );
 
@@ -220,8 +222,6 @@ const deleteKunjunganPasien = async (id, userId) => {
   const connection = await db.getConnection();
 
   try {
-    await connection.beginTransaction();
-
     // Dapatkan id_pemeriksaan sebelum menghapus
     const [kunjungan] = await connection.query(
       'SELECT id_pemeriksaan FROM layanan_kunjungan_pasien WHERE id_kunjungan = ?',
@@ -234,11 +234,8 @@ const deleteKunjunganPasien = async (id, userId) => {
 
     const id_pemeriksaan = kunjungan[0].id_pemeriksaan;
 
-    // Hapus record kunjungan (penghapusan pemeriksaan dilakukan manual karena tidak ada cascade)
-    await connection.query('DELETE FROM layanan_kunjungan_pasien WHERE id_kunjungan = ?', [id]);
-    await connection.query('DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
-
-    await connection.commit();
+    // Soft delete pemeriksaan
+    await connection.query('UPDATE pemeriksaan SET deleted_at = NOW() WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
 
     if (userId) {
       await auditService.recordDataLog(userId, 'DELETE', 'layanan_kunjungan_pasien', id);
@@ -246,7 +243,6 @@ const deleteKunjunganPasien = async (id, userId) => {
 
     return { message: 'Data kunjungan berhasil dihapus' };
   } catch (error) {
-    await connection.rollback();
     throw error;
   } finally {
     connection.release();

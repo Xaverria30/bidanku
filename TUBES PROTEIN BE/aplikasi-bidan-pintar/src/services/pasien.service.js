@@ -16,12 +16,32 @@ const getAllPasien = async (search = null) => {
   let query = 'SELECT * FROM pasien';
   const params = [];
 
+  query += ' WHERE deleted_at IS NULL';
   if (search) {
-    query += ' WHERE nama LIKE ? OR nik LIKE ?';
+    query += ' AND (nama LIKE ? OR nik LIKE ?)';
     params.push(`%${search}%`, `%${search}%`);
   }
 
   query += ' ORDER BY created_at DESC';
+
+  const [rows] = await db.query(query, params);
+  return rows;
+};
+
+/**
+ * Ambil daftar pasien yang dihapus (Soft Delete)
+ * @returns {Array} Daftar pasien terhapus
+ */
+const getDeletedPasien = async (search) => {
+  let query = 'SELECT * FROM pasien WHERE deleted_at IS NOT NULL';
+  const params = [];
+
+  if (search) {
+    query += ' AND (nama LIKE ? OR nik LIKE ?)';
+    params.push(`%${search}%`, `%${search}%`);
+  }
+
+  query += ' ORDER BY deleted_at DESC';
 
   const [rows] = await db.query(query, params);
   return rows;
@@ -33,7 +53,7 @@ const getAllPasien = async (search = null) => {
  * @returns {Object|null} Data pasien
  */
 const getPasienById = async (id) => {
-  const query = 'SELECT * FROM pasien WHERE id_pasien = ?';
+  const query = 'SELECT * FROM pasien WHERE id_pasien = ? AND deleted_at IS NULL';
   const [rows] = await db.query(query, [id]);
   return rows[0] || null;
 };
@@ -88,10 +108,27 @@ const updatePasien = async (id, userId, data) => {
  * @returns {Object} Hasil penghapusan
  */
 const deletePasien = async (id, userId) => {
-  const [result] = await db.query('DELETE FROM pasien WHERE id_pasien = ?', [id]);
+  const [result] = await db.query('UPDATE pasien SET deleted_at = NOW() WHERE id_pasien = ?', [id]);
 
   if (result.affectedRows > 0) {
     await auditService.recordDataLog(userId, 'DELETE', 'pasien', id);
+  }
+
+  return result;
+};
+
+/**
+ * Restore pasien yang terhapus
+ * @param {string} id - ID Pasien
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Hasil restore
+ */
+const restorePasien = async (id, userId) => {
+  // Restore pasien
+  const [result] = await db.query('UPDATE pasien SET deleted_at = NULL WHERE id_pasien = ?', [id]);
+
+  if (result.affectedRows > 0) {
+    await auditService.recordDataLog(userId, 'RESTORE', 'pasien', id);
   }
 
   return result;
@@ -158,5 +195,7 @@ module.exports = {
   updatePasien,
   deletePasien,
   getRiwayatPasien,
-  findOrCreatePasien
+  findOrCreatePasien,
+  restorePasien,
+  getDeletedPasien
 };

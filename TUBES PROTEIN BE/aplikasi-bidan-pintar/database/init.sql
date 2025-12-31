@@ -78,6 +78,7 @@ CREATE TABLE pasien (
     no_hp VARCHAR(15),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     
     UNIQUE INDEX idx_nik_unique (nik),
     INDEX idx_nama (nama)
@@ -122,6 +123,7 @@ CREATE TABLE pemeriksaan (
     tanggal_pemeriksaan DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
     
     CONSTRAINT fk_pemeriksaan_pasien FOREIGN KEY (id_pasien) 
         REFERENCES pasien(id_pasien) ON DELETE CASCADE,

@@ -111,11 +111,13 @@ function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfi
     const queryParams = new URLSearchParams({
       format: 'excel',
       bulan: selectedBulan,
-      tahun: selectedTahun
+      tahun: selectedTahun,
+      jenis_layanan: selectedLayanan
     });
 
     // Tentukan nama file yang disederhanakan
-    const filename = `Laporan_${selectedBulan}_${selectedTahun}.xlsx`;
+    const serviceName = selectedLayanan === 'Semua' ? 'Bulanan' : selectedLayanan.replace(/\s+/g, '_');
+    const filename = `Laporan_${serviceName}_${selectedBulan}_${selectedTahun}.xlsx`;
 
     // Lakukan download
     fetch(`http://localhost:5000/api/laporan/export?${queryParams}`, {

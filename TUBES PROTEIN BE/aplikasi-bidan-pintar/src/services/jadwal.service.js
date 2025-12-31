@@ -31,6 +31,7 @@ const listJadwal = async (bulan, tahun, layanan) => {
       FROM jadwal j
       JOIN pasien p ON j.id_pasien = p.id_pasien
       JOIN users u ON j.id_petugas = u.id_user
+      WHERE p.deleted_at IS NULL
 
       UNION ALL
 
@@ -48,9 +49,9 @@ const listJadwal = async (bulan, tahun, layanan) => {
       FROM layanan_anc anc
       JOIN pemeriksaan pem ON anc.id_pemeriksaan = pem.id_pemeriksaan
       JOIN pasien p ON pem.id_pasien = p.id_pasien
-      WHERE anc.hpl IS NOT NULL
-        AND pem.id_pemeriksaan = (
-          SELECT pem2.id_pemeriksaan
+       WHERE anc.hpl IS NOT NULL AND pem.deleted_at IS NULL AND p.deleted_at IS NULL
+         AND pem.id_pemeriksaan = (
+           SELECT pem2.id_pemeriksaan
           FROM pemeriksaan pem2
           JOIN layanan_anc anc2 ON pem2.id_pemeriksaan = anc2.id_pemeriksaan
           WHERE pem2.id_pasien = pem.id_pasien
@@ -76,9 +77,9 @@ const listJadwal = async (bulan, tahun, layanan) => {
       FROM layanan_imunisasi im
       JOIN pemeriksaan pem ON im.id_pemeriksaan = pem.id_pemeriksaan
       JOIN pasien p ON pem.id_pasien = p.id_pasien
-      WHERE im.jadwal_selanjutnya IS NOT NULL
-        AND pem.id_pemeriksaan = (
-          SELECT pem2.id_pemeriksaan
+       WHERE im.jadwal_selanjutnya IS NOT NULL AND pem.deleted_at IS NULL AND p.deleted_at IS NULL
+         AND pem.id_pemeriksaan = (
+           SELECT pem2.id_pemeriksaan
           FROM pemeriksaan pem2
           JOIN layanan_imunisasi im2 ON pem2.id_pemeriksaan = im2.id_pemeriksaan
           WHERE pem2.id_pasien = pem.id_pasien
@@ -104,9 +105,9 @@ const listJadwal = async (bulan, tahun, layanan) => {
       FROM layanan_kb kb
       JOIN pemeriksaan pem ON kb.id_pemeriksaan = pem.id_pemeriksaan
       JOIN pasien p ON pem.id_pasien = p.id_pasien
-      WHERE kb.kunjungan_ulang IS NOT NULL
-        AND pem.id_pemeriksaan = (
-          SELECT pem2.id_pemeriksaan
+       WHERE kb.kunjungan_ulang IS NOT NULL AND pem.deleted_at IS NULL AND p.deleted_at IS NULL
+         AND pem.id_pemeriksaan = (
+           SELECT pem2.id_pemeriksaan
           FROM pemeriksaan pem2
           JOIN layanan_kb kb2 ON pem2.id_pemeriksaan = kb2.id_pemeriksaan
           WHERE pem2.id_pasien = pem.id_pasien

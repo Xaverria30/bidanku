@@ -246,9 +246,13 @@ const generateSheet = async (workbook, sheetName, jenis_layanan, bulanInt, tahun
       { header: 'Nama Istri', key: 'nama_istri', width: 25 },
       { header: 'Nama Suami', key: 'nama_suami', width: 20 },
       { header: 'NIK', key: 'nik', width: 18 },
-      { header: 'Umur', key: 'umur', width: 8 },
+      { header: 'Umur Istri', key: 'umur_istri', width: 8 },
+      { header: 'Umur Suami', key: 'umur_suami', width: 8 },
       { header: 'Alamat', key: 'alamat', width: 30 },
-      { header: 'TD / BB', key: 'fisik', width: 20 },
+      { header: 'TD Istri', key: 'td_istri', width: 12 },
+      { header: 'BB Istri', key: 'bb_istri', width: 8 },
+      { header: 'TD Suami', key: 'td_suami', width: 12 },
+      { header: 'BB Suami', key: 'bb_suami', width: 8 },
       { header: 'Metode', key: 'metode', width: 15 },
       { header: 'Kunjungan Ulang', key: 'kunjungan_ulang', width: 15 },
       { header: 'Ket/Efek Samping', key: 'ket', width: 25 }
@@ -262,9 +266,13 @@ const generateSheet = async (workbook, sheetName, jenis_layanan, bulanInt, tahun
       nama_istri: item.nama_istri,
       nama_suami: item.nama_suami || '-',
       nik: item.nik_istri || '-',
-      umur: item.umur_istri || '-',
+      umur_istri: item.umur_istri || '-',
+      umur_suami: item.umur_suami || '-',
       alamat: item.alamat || '-',
-      fisik: `TD: ${item.td_ibu || '-'}, BB: ${item.bb_ibu || '-'}`,
+      td_istri: item.td_ibu || '-',
+      bb_istri: item.bb_ibu || '-',
+      td_suami: item.td_ayah || '-',
+      bb_suami: item.bb_ayah || '-',
       metode: item.metode || '-',
       kunjungan_ulang: item.kunjungan_ulang ? new Date(item.kunjungan_ulang).toLocaleDateString('id-ID') : '-',
       ket: item.catatan || '-'
@@ -342,13 +350,17 @@ const generateSheet = async (workbook, sheetName, jenis_layanan, bulanInt, tahun
       { header: 'Tanggal', key: 'tanggal', width: 12 },
       { header: 'No. Reg', key: 'no_reg', width: 15 },
       { header: 'Nama Pasien', key: 'nama', width: 25 },
+      { header: 'Nama Suami / Orang Tua', key: 'nama_wali', width: 25 },
       { header: 'NIK', key: 'nik', width: 18 },
-      { header: 'L/B', key: 'lb', width: 5 },
       { header: 'Umur', key: 'umur', width: 8 },
       { header: 'Alamat', key: 'alamat', width: 30 },
+      { header: 'TD (mmHg)', key: 'td', width: 12 },
+      { header: 'BB (kg)', key: 'bb', width: 8 },
+      { header: 'Jenis Kunjungan', key: 'jenis_kunjungan', width: 15 },
       { header: 'Keluhan', key: 'keluhan', width: 25 },
       { header: 'Diagnosa', key: 'diagnosa', width: 25 },
-      { header: 'Terapi', key: 'terapi', width: 25 }
+      { header: 'Terapi Obat', key: 'terapi', width: 25 },
+      { header: 'Ket', key: 'ket', width: 20 }
     ];
 
     const rawData = await laporanService.getLaporanKunjunganPasien(bulanInt, tahunInt);
@@ -357,13 +369,17 @@ const generateSheet = async (workbook, sheetName, jenis_layanan, bulanInt, tahun
       tanggal: new Date(item.tanggal_pemeriksaan).toLocaleDateString('id-ID'),
       no_reg: item.no_reg || '-',
       nama: item.nama_pasien || '-',
+      nama_wali: item.nama_wali || '-',
       nik: item.nik_pasien || '-',
-      lb: item.jenis_kunjungan === 'Baru' ? 'B' : 'L',
       umur: item.umur_pasien || '-',
       alamat: item.alamat || '-',
+      td: item.td_pasien || '-',
+      bb: item.bb_pasien || '-',
+      jenis_kunjungan: item.jenis_kunjungan || '-',
       keluhan: item.keluhan || '-',
       diagnosa: item.diagnosa || '-',
-      terapi: item.terapi_obat || '-'
+      terapi: item.terapi_obat || '-',
+      ket: item.keterangan || '-'
     }));
 
   } else {

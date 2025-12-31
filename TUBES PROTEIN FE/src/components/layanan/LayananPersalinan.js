@@ -8,6 +8,7 @@ import trashIcon from '../../assets/images/icons/icons8-trash-100.png';
 import layananService from '../../services/layanan.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
+import PilihPasienModal from '../shared/PilihPasienModal';
 
 function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,7 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
+  const [showPasienModal, setShowPasienModal] = useState(false);
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'Persalinan',
@@ -83,6 +85,28 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasienSelect = (pasien) => {
+    setFormData(prev => ({
+      ...prev,
+      nama_istri: pasien.nama,
+      nik_istri: pasien.nik || pasien.NIK,
+      umur_istri: pasien.umur,
+      alamat: pasien.alamat,
+      no_hp: pasien.no_hp,
+      nama_suami: pasien.nama_suami || prev.nama_suami,
+      nik_suami: pasien.nik_suami || prev.nik_suami,
+      umur_suami: pasien.umur_suami || prev.umur_suami,
+    }));
+    setShowPasienModal(false);
+    showNotifikasi({
+      type: 'success',
+      message: 'Data Pasien Berhasil Dipilih!',
+      autoClose: true,
+      autoCloseDuration: 1500,
+      onConfirm: hideNotifikasi
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -509,7 +533,27 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
 
                 {/* Data Ibu */}
                 <div className="persalinan-form-section">
-                  <h3 className="persalinan-form-section-title">Data Ibu</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 className="persalinan-form-section-title" style={{ margin: 0 }}>Data Ibu</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasienModal(true)}
+                      style={{
+                        backgroundColor: '#e91e63',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span>🔍</span> Cari Pasien
+                    </button>
+                  </div>
 
                   <div className="persalinan-form-row">
                     <div className="persalinan-form-group full-width">
@@ -792,6 +836,12 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
         cancelText={notifikasi.cancelText}
         autoClose={notifikasi.autoClose}
         autoCloseDuration={notifikasi.autoCloseDuration}
+      />
+
+      <PilihPasienModal
+        show={showPasienModal}
+        onClose={() => setShowPasienModal(false)}
+        onSelect={handlePasienSelect}
       />
     </div>
   );

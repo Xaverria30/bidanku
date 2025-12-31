@@ -65,7 +65,7 @@ const getLaporanData = async (bulan, tahun, jenis_layanan) => {
         LEFT JOIN layanan_persalinan pers ON r.id_pemeriksaan = pers.id_pemeriksaan
         LEFT JOIN layanan_kunjungan_pasien kp ON r.id_pemeriksaan = kp.id_pemeriksaan
         
-        WHERE MONTH(r.tanggal_pemeriksaan) = ? AND YEAR(r.tanggal_pemeriksaan) = ?
+        WHERE MONTH(r.tanggal_pemeriksaan) = ? AND YEAR(r.tanggal_pemeriksaan) = ? AND p.deleted_at IS NULL AND r.deleted_at IS NULL
       `;
 
   const params = [bulan, tahun];
@@ -103,7 +103,7 @@ const getLaporanANC = async (bulan, tahun) => {
         FROM layanan_anc anc
         JOIN pemeriksaan pem ON anc.id_pemeriksaan = pem.id_pemeriksaan
         JOIN pasien p ON pem.id_pasien = p.id_pasien
-        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ?
+        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ? AND p.deleted_at IS NULL AND pem.deleted_at IS NULL
         ORDER BY pem.tanggal_pemeriksaan ASC
       `;
   const [rows] = await db.query(query, [bulan, tahun]);
@@ -121,11 +121,14 @@ const getLaporanKB = async (bulan, tahun) => {
           kb.nama_ayah as nama_suami,
           p.nik as nik_istri,
           p.umur as umur_istri,
+          kb.umur_ayah as umur_suami,
           p.alamat,
           kb.nomor_registrasi_lama,
           kb.nomor_registrasi_baru,
           kb.td_ibu,
           kb.bb_ibu,
+          kb.td_ayah,
+          kb.bb_ayah,
           kb.metode,
           kb.kunjungan_ulang,
           kb.catatan,
@@ -133,7 +136,7 @@ const getLaporanKB = async (bulan, tahun) => {
         FROM layanan_kb kb
         JOIN pemeriksaan pem ON kb.id_pemeriksaan = pem.id_pemeriksaan
         JOIN pasien p ON pem.id_pasien = p.id_pasien
-        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ?
+        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ? AND p.deleted_at IS NULL AND pem.deleted_at IS NULL
         ORDER BY pem.tanggal_pemeriksaan ASC
       `;
   const [rows] = await db.query(query, [bulan, tahun]);
@@ -162,7 +165,7 @@ const getLaporanImunisasi = async (bulan, tahun) => {
         FROM layanan_imunisasi im
         JOIN pemeriksaan pem ON im.id_pemeriksaan = pem.id_pemeriksaan
         JOIN pasien p ON pem.id_pasien = p.id_pasien
-        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ?
+        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ? AND p.deleted_at IS NULL AND pem.deleted_at IS NULL
         ORDER BY pem.tanggal_pemeriksaan ASC
       `;
   const [rows] = await db.query(query, [bulan, tahun]);
@@ -194,7 +197,7 @@ const getLaporanPersalinan = async (bulan, tahun) => {
       FROM layanan_persalinan prs
       JOIN pemeriksaan pem ON prs.id_pemeriksaan = pem.id_pemeriksaan
       JOIN pasien p ON pem.id_pasien = p.id_pasien
-      WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ?
+      WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ? AND p.deleted_at IS NULL AND pem.deleted_at IS NULL
       ORDER BY pem.tanggal_pemeriksaan ASC
     `;
   const [rows] = await db.query(query, [bulan, tahun]);
@@ -210,6 +213,7 @@ const getLaporanKunjunganPasien = async (bulan, tahun) => {
           pem.tanggal_pemeriksaan,
           kp.no_reg,
           kp.nama_pasien, 
+          kp.nama_wali,
           COALESCE(p.nik, kp.nik_pasien) as nik_pasien,
           kp.umur_pasien,
           p.alamat,
@@ -223,7 +227,7 @@ const getLaporanKunjunganPasien = async (bulan, tahun) => {
         FROM layanan_kunjungan_pasien kp
         JOIN pemeriksaan pem ON kp.id_pemeriksaan = pem.id_pemeriksaan
         LEFT JOIN pasien p ON pem.id_pasien = p.id_pasien
-        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ?
+        WHERE MONTH(pem.tanggal_pemeriksaan) = ? AND YEAR(pem.tanggal_pemeriksaan) = ? AND (p.deleted_at IS NULL OR p.id_pasien IS NULL) AND pem.deleted_at IS NULL
         ORDER BY pem.tanggal_pemeriksaan ASC
       `;
   const [rows] = await db.query(query, [bulan, tahun]);
@@ -418,6 +422,7 @@ const calculateLaporanSummary = async (jenis_layanan, bulan, tahun) => {
         FROM pemeriksaan pe
         WHERE MONTH(pe.tanggal_pemeriksaan) = ? 
           AND YEAR(pe.tanggal_pemeriksaan) = ?
+          AND pe.deleted_at IS NULL
       `;
 
   const params = [bulan, tahun];

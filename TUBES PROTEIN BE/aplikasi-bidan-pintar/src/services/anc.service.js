@@ -109,7 +109,7 @@ const getANCById = async (id_pemeriksaan) => {
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_anc anc ON p.id_pemeriksaan = anc.id_pemeriksaan
     LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'ANC' AND j.tanggal = p.tanggal_pemeriksaan
-    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'ANC'
+    WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'ANC' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
   return rows[0] || null;
@@ -195,18 +195,15 @@ const deleteANCRegistrasi = async (id_pemeriksaan, userId) => {
   const connection = await db.getConnection();
 
   try {
-    await connection.beginTransaction();
+    const [result] = await connection.query(
+      'UPDATE pemeriksaan SET deleted_at = NOW() WHERE id_pemeriksaan = ?',
+      [id_pemeriksaan]
+    );
 
-    // Hapus dari tabel layanan_anc
-    await connection.query('DELETE FROM layanan_anc WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
-
-    // Hapus dari tabel pemeriksaan
-    await connection.query('DELETE FROM pemeriksaan WHERE id_pemeriksaan = ?', [id_pemeriksaan]);
-
-    await connection.commit();
-    await auditService.recordDataLog(userId, 'DELETE', 'layanan_anc', id_pemeriksaan);
+    if (result.affectedRows > 0) {
+      await auditService.recordDataLog(userId, 'DELETE', 'layanan_anc', id_pemeriksaan);
+    }
   } catch (error) {
-    await connection.rollback();
     throw error;
   } finally {
     connection.release();
@@ -235,7 +232,7 @@ const getAllANC = async (search = '') => {
       FROM pemeriksaan pm
       LEFT JOIN layanan_anc anc ON pm.id_pemeriksaan = anc.id_pemeriksaan
       LEFT JOIN pasien p ON pm.id_pasien = p.id_pasien
-      WHERE pm.jenis_layanan = 'ANC'
+      WHERE pm.jenis_layanan = 'ANC' AND pm.deleted_at IS NULL AND p.deleted_at IS NULL
     `;
 
     const params = [];
