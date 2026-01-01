@@ -29,7 +29,8 @@ const getAllKunjunganPasien = async (search = '') => {
         p.tanggal_pemeriksaan
       FROM layanan_kunjungan_pasien k
       LEFT JOIN pemeriksaan p ON k.id_pemeriksaan = p.id_pemeriksaan
-      WHERE p.deleted_at IS NULL
+      LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
+      WHERE p.deleted_at IS NULL AND pas.deleted_at IS NULL
     `;
 
     let params = [];
