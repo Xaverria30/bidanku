@@ -6,11 +6,11 @@
 -- =============================================================================
 
 -- Create database if not exists
-CREATE DATABASE IF NOT EXISTS aplikasi_bidan
+CREATE DATABASE IF NOT EXISTS bidanku
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
-USE aplikasi_bidan;
+USE bidanku;
 
 -- =============================================================================
 -- DROP EXISTING TABLES (for clean reinstall)

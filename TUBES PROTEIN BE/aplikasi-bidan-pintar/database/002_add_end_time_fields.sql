@@ -5,7 +5,7 @@
 --              to allow flexible appointment duration instead of fixed 1-hour default
 -- =============================================================================
 
-USE aplikasi_bidan;
+USE bidanku;
 
 -- Add jam_hpl_selesai to layanan_anc
 ALTER TABLE layanan_anc 
