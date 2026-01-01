@@ -1,118 +1,110 @@
-# DNS & VPS Setup Guide
+# Panduan Setup DNS & VPS (Deployment)
 
-This guide covers setting up your domain `bidanku.site` and configuring your VPS (`145.79.15.211`).
+Panduan ini akan membantumu melakukan deployment aplikasi **Bidanku** ke VPS dengan domain `bidanku.site` menggunakan HTTPS (SSL).
 
-## Part 1: DNS Configuration (Domain)
+## Prasyarat
+-   Sudah membeli domain `bidanku.site`.
+-   Sudah membeli VPS dengan IP `145.79.15.211`.
+-   Punya file `.env.docker` yang sudah diisi lengkap (termasuk config OAuth2).
 
-You need to point your domain to your VPS IP address so that visitors can access your site.
+---
 
-1.  **Login** to your domain registrar (where you bought `bidanku.site`).
-2.  Find the **DNS Management** or **DNS Records** section.
-3.  **Add/Edit Records**:
+## Tahap 1: Konfigurasi DNS (Domain)
+Lakukan ini pertama kali agar DNS menyebar (propagate).
 
-| Type | Host / Name | Value / Target | TTL |
-| :--- | :--- | :--- | :--- |
-| **A** | `@` | `145.79.15.211` | Automatic / 1 min |
-| **A** | `www` | `145.79.15.211` | Automatic / 1 min |
+1.  Login ke panel domain manager kamu (tempat beli domain).
+2.  Masuk ke menu **DNS Management**.
+3.  Buat/Edit 2 Record ini:
 
-> [!NOTE]
-> It may take anywhere from a few minutes to 24 hours for these changes to propagate worldwide.
+| Type | Host / Name | Value / Target |
+| :--- | :--- | :--- |
+| **A** | `@` | `145.79.15.211` |
+| **CNAME** | `www` | `bidanku.site` |
 
-## Part 2: VPS Setup (Server)
+> **Pastikan:** Hapus record lama (default parking page) jika ada yang bertabrakan.
 
-### 1. Login to VPS
-Use SSH to connect to your server. Open your terminal (PowerShell/CMD on Windows):
+---
 
-```bash
+## Tahap 2: Persiapan di VPS
+Sekarang kita masuk ke dalam server VPS kamu.
+
+### 1. Login SSH
+Buka terminal (PowerShell/CMD) di laptopmu:
+```powershell
 ssh root@145.79.15.211
-# Enter your VPS password when prompted
 ```
+*(Masukkan password VPS kamu saat diminta)*
 
-### 2. Update System
-Running a fresh update is always good practice.
+### 2. Update Sistem & Install Docker
+Salin dan jalankan perintah ini satu per satu:
 
 ```bash
+# Update server
 apt update && apt upgrade -y
-```
-
-### 3. Install Docker & Docker Compose
-Install the Docker engine.
-
-```bash
-# Install prerequisites
-apt install -y apt-transport-https ca-certificates curl software-properties-common
-
-# Add Docker’s official GPG key
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-# Add Docker repository
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Install Docker
-apt update
-apt install -y docker-ce docker-ce-cli containerd.io
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
 
 # Install Docker Compose (plugin)
-apt install -y docker-compose-plugin
+apt install docker-compose-plugin -y
 ```
 
-### 4. Deploy Application
-
-You have two options to get your code onto the server: **Git** (Recommended) or **SCP** (File Copy).
-
-#### Option A: Using Git (If your repo is on GitHub/GitLab)
+### 3. Clone Repository
+Kita ambil kodingan dari GitHub kamu:
 
 ```bash
-# 1. Clone your repository
-git clone https://github.com/your-username/AplikasiBidanFeBe.git bidanku
-
-# 2. Enter directory
+git clone https://github.com/Xaverria30/bidanku.git
 cd bidanku
 ```
 
-#### Option B: Setup Manually (If no Git repo)
+---
+
+## Tahap 3: Konfigurasi Environment & SSL
+
+### 1. Buat File `.env`
+Kita copy template `.env.docker` ke `.env` asli:
 
 ```bash
-# 1. Create directory
-mkdir -p ~/bidanku
-
-# 2. On your LOCAL Machine (Windows), copy files to VPS
-# Run this from your project folder in Windows PowerShell:
-scp -r "TUBES PROTEIN BE" "TUBES PROTEIN FE" docker-compose.yml nginx.conf .env.docker root@145.79.15.211:~/bidanku/
+cp .env.docker .env
+nano .env
 ```
+*   Silakan edit isinya (masukkan `EMAIL_USER`, `CLIENT_ID`, `CLIENT_SECRET`, `REFRESH_TOKEN` yang asli).
+*   Tekan `Ctrl+O` -> `Enter` untuk Save.
+*   Tekan `Ctrl+X` untuk Exit.
 
-### 5. Configure Environment
-
-1.  **Enter the project directory on VPS**:
-    ```bash
-    cd ~/bidanku
-    ```
-2.  **Setup `.env`**:
-    ```bash
-    cp .env.docker .env
-    nano .env
-    ```
-3.  **Edit**:
-    - Update `JWT_SECRET`, `EMAIL_USER`, etc. with real values.
-    - Save: `Ctrl+O`, `Enter`, `Ctrl+X`.
-
-### 6. Run Application
+### 2. Jalankan Script SSL (Hanya Pertama Kali)
+Karena kita pakai HTTPS, kita perlu merequest sertifikat dulu. Saya sudah buatkan script otomatisnya:
 
 ```bash
-docker compose up -d --build
+chmod +x init-letsencrypt.sh
+./init-letsencrypt.sh
+```
+*   Script ini akan mendownload sertifikat SSL gratis dari Let's Encrypt.
+*   Tunggu sampai selesai dan muncul tulisan sukses.
+
+---
+
+## Tahap 4: Menjalankan Aplikasi
+
+Setelah sertifikat berhasil didapat, jalankan aplikasi:
+
+```bash
+docker compose up -d
 ```
 
-### 7. Verification
+### Cek Status
+```bash
+docker compose ps
+```
+Pastikan semua container (`bidanku-app`, `nginx`, `mariadb`, `phpmyadmin`) berstatus **Up**.
 
-- Visit `http://bidanku.site` in your browser.
-- Visit `http://bidanku.site/api/health` to check the backend.
+---
 
-## Bonus: SSL with Certbot (HTTPS)
-Since you own the domain, you can set up free secure HTTPS.
+## Tahap 5: Verifikasi
+Buka browser dan akses:
+*   Website: **[https://bidanku.site](https://bidanku.site)** (Harus ada gembok hijau 🔒)
+*   API: `https://bidanku.site/api`
+*   PhpMyAdmin: `http://145.79.15.211:8081` (Login: `root` / `bismillah`)
 
-1.  **Modify `docker-compose.yml`** to use the `certbot/certbot` image (Optional advanced setup), OR
-2.  **Simple Method**:
-    - Install Certbot on Host: `apt install -y certbot python3-certbot-nginx`
-    - *Note: This requires running Nginx on the host, referencing the docker containers via Proxy, effectively changing our setup. For simplicity, use the Docker setup provided and consider a separate Nginx Proxy Manager container for easy SSL if needed later.*
-
-For now, verify the site works on **HTTP** first.
+**Selesai! Aplikasi kamu sudah live.** 🚀
