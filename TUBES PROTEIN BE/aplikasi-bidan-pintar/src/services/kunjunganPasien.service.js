@@ -99,6 +99,18 @@ const createRegistrasiKunjunganPasien = async (data, userId) => {
     jenis_kunjungan_fixed = 'Bayi/Anak';
   }
 
+  // Sanitize inputs (Convert empty strings to NULL)
+  const sanitize = (val) => (val === '' || val === undefined ? null : val);
+
+  const nik_wali_sanitized = sanitize(nik_wali);
+  const umur_wali_sanitized = sanitize(umur_wali);
+  const bb_pasien_sanitized = sanitize(bb_pasien);
+  const td_pasien_sanitized = sanitize(td_pasien);
+  const no_reg_sanitized = sanitize(no_reg);
+  const nama_wali_sanitized = sanitize(nama_wali);
+  const terapi_obat_sanitized = sanitize(terapi_obat);
+  const keterangan_sanitized = sanitize(keterangan);
+
   const connection = await db.getConnection();
 
   try {
@@ -131,7 +143,7 @@ const createRegistrasiKunjunganPasien = async (data, userId) => {
     await connection.query(
       `INSERT INTO layanan_kunjungan_pasien (id_kunjungan, id_pemeriksaan, tanggal, no_reg, jenis_kunjungan, nama_pasien, nik_pasien, umur_pasien, bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id_kunjungan, id_pemeriksaan, tanggal, no_reg, jenis_kunjungan_fixed, nama_pasien, nik_pasien, umur_pasien, bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan]
+      [id_kunjungan, id_pemeriksaan, tanggal, no_reg_sanitized, jenis_kunjungan_fixed, nama_pasien, nik_pasien, umur_pasien, bb_pasien_sanitized, td_pasien_sanitized, nama_wali_sanitized, nik_wali_sanitized, umur_wali_sanitized, keluhan, diagnosa, terapi_obat_sanitized, keterangan_sanitized]
     );
 
     await connection.commit();
@@ -163,6 +175,18 @@ const updateKunjunganPasien = async (id, data, userId) => {
     tanggal, no_reg, jenis_kunjungan,
     keluhan, diagnosa, terapi_obat, keterangan
   } = data;
+
+  // Sanitize inputs
+  const sanitize = (val) => (val === '' || val === undefined ? null : val);
+
+  const nik_wali_sanitized = sanitize(nik_wali);
+  const umur_wali_sanitized = sanitize(umur_wali);
+  const bb_pasien_sanitized = sanitize(bb_pasien);
+  const td_pasien_sanitized = sanitize(td_pasien);
+  const no_reg_sanitized = sanitize(no_reg);
+  const nama_wali_sanitized = sanitize(nama_wali);
+  const terapi_obat_sanitized = sanitize(terapi_obat);
+  const keterangan_sanitized = sanitize(keterangan);
 
   const connection = await db.getConnection();
 
@@ -204,7 +228,7 @@ const updateKunjunganPasien = async (id, data, userId) => {
            bb_pasien = ?, td_pasien = ?, nama_wali = ?, nik_wali = ?, umur_wali = ?, 
            keluhan = ?, diagnosa = ?, terapi_obat = ?, keterangan = ?
        WHERE id_kunjungan = ?`,
-      [tanggal, no_reg, jenis_kunjungan, /* nama_pasien, nik_pasien, umur_pasien, */ bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan, id]
+      [tanggal, no_reg_sanitized, jenis_kunjungan, /* nama_pasien, nik_pasien, umur_pasien, */ bb_pasien_sanitized, td_pasien_sanitized, nama_wali_sanitized, nik_wali_sanitized, umur_wali_sanitized, keluhan, diagnosa, terapi_obat_sanitized, keterangan_sanitized, id]
     );
 
     await connection.commit();
