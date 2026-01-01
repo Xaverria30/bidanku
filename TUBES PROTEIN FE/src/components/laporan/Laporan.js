@@ -121,9 +121,7 @@ function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfi
     const filename = `Laporan_${serviceName}_${selectedBulan}_${selectedTahun}.xlsx`;
 
     // Lakukan download
-    import { API_BASE_URL } from '../../services/api';
-    import { useState, useEffect } from 'react';
-    // ... (keep existing lines)
+
 
     // Lakukan download
     fetch(`${API_BASE_URL}/laporan/export?${queryParams}`, {
