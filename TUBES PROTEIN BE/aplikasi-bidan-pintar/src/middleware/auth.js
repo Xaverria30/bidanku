@@ -11,7 +11,7 @@ const { unauthorized, forbidden } = require('../utils/response');
  * Verifikasi token JWT dari header Authorization
  * Format token: Bearer <token>
  */
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   // Cek apakah header authorization ada dan formatnya benar
@@ -31,6 +31,14 @@ const verifyToken = (req, res, next) => {
       username: decoded.username,
       email: decoded.email
     };
+
+    // VERIFIKASI DB: Pastikan user masih ada (mencegah error audit log jika DB di-reset)
+    const db = require('../config/database');
+    const [userExists] = await db.query('SELECT id_user FROM users WHERE id_user = ?', [decoded.id]);
+
+    if (userExists.length === 0) {
+      return forbidden(res, 'User tidak ditemukan (Token Stale). Silakan login kembali.');
+    }
 
     next();
   } catch (error) {

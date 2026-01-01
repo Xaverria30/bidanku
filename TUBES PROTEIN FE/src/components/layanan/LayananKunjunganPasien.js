@@ -87,9 +87,9 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getFullYear() === today.getFullYear() && 
-               itemDay.getMonth() === today.getMonth() && 
-               itemDay.getDate() === today.getDate();
+        return itemDay.getFullYear() === today.getFullYear() &&
+          itemDay.getMonth() === today.getMonth() &&
+          itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -165,6 +165,16 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
       setFormData({
         ...formData,
         [name]: limitedValue
+      });
+      return;
+    }
+
+    // Replace comma with dot for decimals (bb_pasien)
+    if (name === 'bb_pasien') {
+      const sanitizedValue = value.replace(',', '.');
+      setFormData({
+        ...formData,
+        [name]: sanitizedValue
       });
       return;
     }
@@ -560,7 +570,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                     <button
                       className="kunjungan-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                      style={{ 
+                      style={{
                         background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
                         borderColor: filterType !== 'Semua Data' ? '#e91e63' : '#ddd',
                         display: 'flex',
