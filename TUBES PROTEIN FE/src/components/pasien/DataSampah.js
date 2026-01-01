@@ -88,7 +88,6 @@ function DataSampah({
         });
     };
 
-<<<<<<< HEAD
     const handlePermanentDelete = (pasienId) => {
         showNotifikasi({
             type: 'confirm-delete',
@@ -124,21 +123,6 @@ function DataSampah({
             },
             onCancel: hideNotifikasi
         });
-=======
-    const handlePermanentDelete = async (pasienId) => {
-        if (window.confirm('PERINGATAN: Tindakan ini tidak dapat dibatalkan! Apakah Anda yakin ingin menghapus data pasien ini secara PERMANEN?')) {
-            try {
-                const response = await pasienService.deletePasienPermanent(pasienId);
-                if (response.success) {
-                    alert('Data pasien berhasil dihapus secara permanen');
-                    fetchDeletedData(searchQuery);
-                }
-            } catch (error) {
-                console.error('Error deleting pasien permanently:', error);
-                alert('Gagal menghapus data pasien secara permanen');
-            }
-        }
->>>>>>> origin/main
     };
 
     return (
