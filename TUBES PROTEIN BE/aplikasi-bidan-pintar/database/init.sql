@@ -79,6 +79,7 @@ CREATE TABLE pasien (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
+    is_permanent_deleted TINYINT(1) DEFAULT 0,
     
     UNIQUE INDEX idx_nik_unique (nik),
     INDEX idx_nama (nama)
@@ -317,7 +318,7 @@ CREATE TABLE audit_log_akses (
 CREATE TABLE audit_logs (
     id_audit CHAR(36) NOT NULL PRIMARY KEY,
     id_user CHAR(36),
-    action ENUM('CREATE', 'UPDATE', 'DELETE') NOT NULL,
+    action ENUM('CREATE', 'UPDATE', 'DELETE', 'RESTORE', 'DELETE_PERMANENT') NOT NULL,
     description VARCHAR(100) NOT NULL COMMENT 'Table name affected',
     id_data_terkait CHAR(36) NOT NULL COMMENT 'ID of affected record',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

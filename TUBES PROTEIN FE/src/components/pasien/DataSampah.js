@@ -60,6 +60,21 @@ function DataSampah({
         }
     };
 
+    const handlePermanentDelete = async (pasienId) => {
+        if (window.confirm('PERINGATAN: Tindakan ini tidak dapat dibatalkan! Apakah Anda yakin ingin menghapus data pasien ini secara PERMANEN?')) {
+            try {
+                const response = await pasienService.deletePasienPermanent(pasienId);
+                if (response.success) {
+                    alert('Data pasien berhasil dihapus secara permanen');
+                    fetchDeletedPasienList(searchQuery);
+                }
+            } catch (error) {
+                console.error('Error deleting pasien permanently:', error);
+                alert('Gagal menghapus data pasien secara permanen');
+            }
+        }
+    };
+
     return (
         <div className="data-pasien-page">
             {/* Header */}
@@ -141,6 +156,29 @@ function DataSampah({
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                         <polyline points="1 4 1 10 7 10"></polyline>
                                                         <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    className="dp-btn-delete-permanent"
+                                                    onClick={() => handlePermanentDelete(pasien.id_pasien)}
+                                                    title="Hapus Permanen"
+                                                    style={{
+                                                        backgroundColor: '#f44336',
+                                                        border: 'none',
+                                                        borderRadius: '5px',
+                                                        padding: '5px 10px',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        marginLeft: '5px'
+                                                    }}
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                        <line x1="14" y1="11" x2="14" y2="17"></line>
                                                     </svg>
                                                 </button>
                                             </div>

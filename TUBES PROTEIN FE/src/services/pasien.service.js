@@ -89,6 +89,19 @@ export const restorePasien = async (id) => {
   });
 };
 
+
+
+/**
+ * Hapus pasien secara permanen
+ * @param {string} id - ID Pasien
+ * @returns {Promise<object>} Data respons
+ */
+export const deletePasienPermanent = async (id) => {
+  return apiRequest(`/pasien/permanent/${id}`, {
+    method: 'DELETE',
+  });
+};
+
 export default {
   getAllPasien,
   getPasienById,
@@ -98,4 +111,5 @@ export default {
   getRiwayatPasien,
   getDeletedPasien,
   restorePasien,
+  deletePasienPermanent,
 };
