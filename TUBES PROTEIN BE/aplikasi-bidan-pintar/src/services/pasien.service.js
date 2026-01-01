@@ -52,9 +52,57 @@ const getDeletedPasien = async (search) => {
  * @param {string} id - ID Pasien
  * @returns {Object|null} Data pasien
  */
+/**
+ * Helper: Ambil data keluarga (Suami/Ayah) dari kunjungan terakhir
+ */
+const getLastFamilyData = async (id_pasien) => {
+  // Cek Persalinan (nama_suami)
+  const [persalinan] = await db.query(
+    `SELECT pers.nama_suami, pers.nik_suami, pers.umur_suami 
+     FROM layanan_persalinan pers
+     JOIN pemeriksaan p ON pers.id_pemeriksaan = p.id_pemeriksaan
+     WHERE p.id_pasien = ? AND p.deleted_at IS NULL
+     ORDER BY p.tanggal_pemeriksaan DESC LIMIT 1`,
+    [id_pasien]
+  );
+  if (persalinan[0] && persalinan[0].nama_suami) return persalinan[0];
+
+  // Cek ANC (nama_suami)
+  const [anc] = await db.query(
+    `SELECT anc.nama_suami, NULL as nik_suami, NULL as umur_suami
+     FROM layanan_anc anc
+     JOIN pemeriksaan p ON anc.id_pemeriksaan = p.id_pemeriksaan
+     WHERE p.id_pasien = ? AND p.deleted_at IS NULL
+     ORDER BY p.tanggal_pemeriksaan DESC LIMIT 1`,
+    [id_pasien]
+  );
+  if (anc[0] && anc[0].nama_suami) return anc[0];
+
+  // Cek KB (nama_ayah is suami)
+  const [kb] = await db.query(
+    `SELECT kb.nama_ayah as nama_suami, NULL as nik_suami, kb.umur_ayah as umur_suami
+     FROM layanan_kb kb
+     JOIN pemeriksaan p ON kb.id_pemeriksaan = p.id_pemeriksaan
+     WHERE p.id_pasien = ? AND p.deleted_at IS NULL
+     ORDER BY p.tanggal_pemeriksaan DESC LIMIT 1`,
+    [id_pasien]
+  );
+  if (kb[0] && kb[0].nama_suami) return kb[0];
+
+  return null;
+};
+
 const getPasienById = async (id) => {
   const query = 'SELECT * FROM pasien WHERE id_pasien = ? AND deleted_at IS NULL';
   const [rows] = await db.query(query, [id]);
+
+  if (rows[0]) {
+    const familyData = await getLastFamilyData(id);
+    if (familyData) {
+      rows[0].latest_husband_data = familyData;
+    }
+  }
+
   return rows[0] || null;
 };
 
