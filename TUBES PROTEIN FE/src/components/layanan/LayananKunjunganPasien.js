@@ -69,17 +69,27 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
       let dateStr = item.tanggal;
       if (!dateStr) return false;
 
-      // Handle potential DD/MM/YYYY format if any
-      let itemDate = new Date(dateStr);
-      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+      // Ensure we have a valid Date object
+      let itemDate;
+      if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts[0].length === 4) {
+          itemDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        } else {
+          itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      } else {
+        itemDate = new Date(dateStr);
       }
+
+      if (isNaN(itemDate.getTime())) return false;
 
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getTime() === today.getTime();
+        return itemDay.getFullYear() === today.getFullYear() && 
+               itemDay.getMonth() === today.getMonth() && 
+               itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -113,7 +123,7 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
         const mappedData = response.data.map(item => ({
           id: item.id,
           nama_pasien: item.nama_pasien || 'Pasien',
-          tanggal: item.tanggal,
+          tanggal: item.tanggal || item.tanggal_pemeriksaan,
           jenis_layanan: item.jenis_layanan
         }));
         setRiwayatPelayanan(mappedData);
@@ -550,8 +560,17 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                     <button
                       className="kunjungan-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      style={{ 
+                        background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                        borderColor: filterType !== 'Semua Data' ? '#e91e63' : '#ddd',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: filterType !== 'Semua Data' ? '0 10px' : '5px'
+                      }}
                     >
                       <img src={filterIcon} alt="Filter" style={{ width: '20px', height: '20px' }} />
+                      {filterType !== 'Semua Data' && <span style={{ marginLeft: '5px', fontSize: '12px', fontWeight: 'bold', color: '#e91e63' }}>{filterType}</span>}
                     </button>
                     {showFilterDropdown && (
                       <div className="kunjungan-filter-dropdown">
@@ -579,7 +598,15 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                     filteredRiwayat.map((item) => (
                       <div key={item.id} className="kunjungan-riwayat-item">
                         <span className="kunjungan-riwayat-text">
-                          {item.nama_pasien} - {new Date(item.tanggal).toLocaleDateString('id-ID')}
+                          {item.nama_pasien} - {(() => {
+                            if (!item.tanggal) return '-';
+                            const d = new Date(item.tanggal);
+                            if (isNaN(d.getTime())) return item.tanggal;
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            return `${day}/${month}/${year}`;
+                          })()}
                         </span>
                         <div className="kunjungan-riwayat-actions">
                           <button

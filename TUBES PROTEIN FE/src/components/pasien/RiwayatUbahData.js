@@ -97,7 +97,11 @@ function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, o
 
     // Filter berdasarkan action (CREATE, UPDATE, DELETE)
     if (filterAction) {
-      filtered = filtered.filter(item => item.action === filterAction);
+      if (filterAction === 'DELETE_PERMANENT') {
+        filtered = filtered.filter(item => item.action === 'DELETE_PERMANENT' || item.action === 'DELETE_PERMANEN');
+      } else {
+        filtered = filtered.filter(item => item.action === filterAction);
+      }
     }
 
     // Filter berdasarkan kategori
@@ -179,7 +183,8 @@ function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, o
                   <option value="CREATE">Dibuat</option>
                   <option value="UPDATE">Diubah</option>
                   <option value="DELETE">Dihapus</option>
-                  <option value="RECOVERY">Dipulihkan</option>
+                  <option value="DELETE_PERMANENT">Hapus Permanen</option>
+                  <option value="RESTORE">Dipulihkan</option>
                 </select>
               </div>
 

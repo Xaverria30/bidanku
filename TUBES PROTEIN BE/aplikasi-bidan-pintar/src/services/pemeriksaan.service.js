@@ -32,7 +32,7 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
   } else if (jenisLayanan === 'Persalinan') {
     query += `, per.id_persalinan, per.no_reg`;
   } else if (jenisLayanan === 'Kunjungan Pasien') {
-    query += `, kp.id_kunjungan`;
+    query += `, kp.id_kunjungan, kp.no_reg`;
   }
 
   query += `
@@ -83,6 +83,8 @@ const getAllPemeriksaan = async (jenisLayanan = null, search = null) => {
       row.nomor_registrasi = row.no_reg;
     } else if (row.jenis_layanan === 'Persalinan') {
       row.nomor_registrasi = row.no_reg_baru || row.no_reg_lama;
+    } else if (row.jenis_layanan === 'Kunjungan Pasien') {
+      row.nomor_registrasi = row.no_reg;
     }
     return row;
   });
