@@ -75,6 +75,8 @@ function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, o
         return 'Dihapus';
       case 'RESTORE':
         return 'Dipulihkan';
+      case 'DELETE_PERMANENT':
+        return 'Hapus Permanen';
       default:
         return 'Dipulihkan';
     }
@@ -277,7 +279,7 @@ function RiwayatUbahData({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, o
                       <td>{item.nomor_registrasi}</td>
                       <td>{item.kategori}</td>
                       <td>
-                        <span className={`rud-status ${item.action === 'UPDATE' ? 'status-diubah' : item.action === 'DELETE' ? 'status-dihapus' : 'status-dibuat'}`}>
+                        <span className={`rud-status ${item.action === 'UPDATE' ? 'status-diubah' : (item.action === 'DELETE' || item.action === 'DELETE_PERMANENT') ? 'status-dihapus' : 'status-dibuat'}`}>
                           {item.keterangan}
                         </span>
                       </td>

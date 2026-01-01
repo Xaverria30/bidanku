@@ -16,7 +16,7 @@ const getAllPasien = async (search = null) => {
   let query = 'SELECT * FROM pasien';
   const params = [];
 
-  query += ' WHERE deleted_at IS NULL';
+  query += ' WHERE deleted_at IS NULL AND is_permanent_deleted = 0';
   if (search) {
     query += ' AND (nama LIKE ? OR nik LIKE ?)';
     params.push(`%${search}%`, `%${search}%`);
@@ -33,7 +33,7 @@ const getAllPasien = async (search = null) => {
  * @returns {Array} Daftar pasien terhapus
  */
 const getDeletedPasien = async (search) => {
-  let query = 'SELECT * FROM pasien WHERE deleted_at IS NOT NULL';
+  let query = 'SELECT * FROM pasien WHERE deleted_at IS NOT NULL AND is_permanent_deleted = 0';
   const params = [];
 
   if (search) {
@@ -201,6 +201,43 @@ const restorePasien = async (id, userId) => {
 };
 
 /**
+ * Hapus pasien secara permanen (Hard Delete)
+ * @param {string} id - ID Pasien
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Hasil penghapusan
+ */
+/**
+ * Hapus pasien secara permanen (Fake Hard Delete untuk menjaga referensi log)
+ * @param {string} id - ID Pasien
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Hasil penghapusan
+ */
+const deletePasienPermanent = async (id, userId) => {
+  // Kita tidak melakukan DELETE fisik karena akan menghilangkan Nama Pasien di Audit Log
+  // Solusi: Tandai sebagai permanent deleted, dan acak NIK agar bisa dipakai ulang
+  const scrambledNik = `DEL-${uuidv4().substring(0, 8)}-${Date.now()}`;
+  
+  const query = `
+    UPDATE pasien 
+    SET is_permanent_deleted = 1, 
+        deleted_at = NOW(), 
+        nik = ? 
+    WHERE id_pasien = ?
+  `;
+  
+  const [result] = await db.query(query, [scrambledNik, id]);
+
+  if (result.affectedRows > 0) {
+    await auditService.recordDataLog(userId, 'DELETE_PERMANENT', 'pasien', id);
+    
+    // Opsional: Hapus data sensitif lain jika perlu (alamat, hp), tapi Nama tetap disimpan
+    // await db.query('UPDATE pasien SET alamat = NULL, no_hp = NULL WHERE id_pasien = ?', [id]);
+  }
+
+  return result;
+};
+
+/**
  * Ambil riwayat pemeriksaan pasien
  * @param {string} id - ID Pasien
  * @returns {Array} Riwayat pemeriksaan
@@ -263,5 +300,6 @@ module.exports = {
   getRiwayatPasien,
   findOrCreatePasien,
   restorePasien,
-  getDeletedPasien
+  getDeletedPasien,
+  deletePasienPermanent
 };
