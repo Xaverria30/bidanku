@@ -79,12 +79,15 @@ services:
     volumes:
       - ./TUBES PROTEIN FE:/usr/src/app
       - /usr/src/app/node_modules
+    env_file:
+      - .env.docker
     ports:
-      - "5173:5173"
+      - "3000:3000"
     environment:
       - CHOKIDAR_USEPOLLING=true
       - HOST=0.0.0.0
       - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
     depends_on:
       - app
     networks:
