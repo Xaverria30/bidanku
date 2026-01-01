@@ -234,7 +234,178 @@ const getLaporanKunjunganPasien = async (bulan, tahun) => {
   return rows;
 };
 
-// ... skipped ...
+/**
+ * Ambil daftar ringkasan laporan
+ * @param {Object} filters - Opsi filter
+ * @returns {Array} Daftar laporan
+ */
+const getLaporanList = async (filters = {}) => {
+  let query = `
+        SELECT 
+          id_laporan,
+          jenis_layanan,
+          periode,
+          tanggal_dibuat,
+          jumlah_pasien,
+          jumlah_kunjungan,
+          label,
+          created_at
+        FROM laporan
+        WHERE 1=1
+      `;
+
+  const params = [];
+
+  if (filters.jenis_layanan) {
+    query += ` AND jenis_layanan = ?`;
+    params.push(filters.jenis_layanan);
+  }
+
+  if (filters.periode) {
+    query += ` AND periode = ?`;
+    params.push(filters.periode);
+  }
+
+  if (filters.search) {
+    query += ` AND (label LIKE ? OR jenis_layanan LIKE ? OR periode LIKE ?)`;
+    const searchPattern = `%${filters.search}%`;
+    params.push(searchPattern, searchPattern, searchPattern);
+  }
+
+  query += ` ORDER BY tanggal_dibuat DESC, created_at DESC`;
+
+  if (filters.limit) {
+    query += ` LIMIT ?`;
+    params.push(parseInt(filters.limit));
+  }
+
+  const [rows] = await db.query(query, params);
+  return rows;
+};
+
+/**
+ * Ambil laporan berdasarkan ID
+ * @param {string} id_laporan - ID Laporan
+ * @returns {Object} Data laporan
+ */
+const getLaporanById = async (id_laporan) => {
+  const query = `
+        SELECT 
+          id_laporan,
+          jenis_layanan,
+          periode,
+          tanggal_dibuat,
+          jumlah_pasien,
+          jumlah_kunjungan,
+          label,
+          created_at,
+          updated_at
+        FROM laporan
+        WHERE id_laporan = ?
+      `;
+
+  const [rows] = await db.query(query, [id_laporan]);
+  return rows[0];
+};
+
+/**
+ * Buat ringkasan laporan baru
+ * @param {Object} data - Data laporan
+ * @returns {Object} Laporan yang dibuat
+ */
+const createLaporan = async (data) => {
+  const id_laporan = uuidv4();
+
+  const query = `
+        INSERT INTO laporan (
+          id_laporan,
+          jenis_layanan,
+          periode,
+          tanggal_dibuat,
+          jumlah_pasien,
+          jumlah_kunjungan,
+          label
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+
+  const params = [
+    id_laporan,
+    data.jenis_layanan,
+    data.periode,
+    data.tanggal_dibuat || new Date().toISOString().split('T')[0],
+    data.jumlah_pasien || 0,
+    data.jumlah_kunjungan || 0,
+    data.label || null
+  ];
+
+  await db.query(query, params);
+
+  return await getLaporanById(id_laporan);
+};
+
+/**
+ * Update laporan
+ * @param {string} id_laporan - ID Laporan
+ * @param {Object} data - Data update
+ * @returns {Object} Laporan yang diupdate
+ */
+const updateLaporan = async (id_laporan, data) => {
+  const updates = [];
+  const params = [];
+
+  if (data.jenis_layanan !== undefined) {
+    updates.push('jenis_layanan = ?');
+    params.push(data.jenis_layanan);
+  }
+
+  if (data.periode !== undefined) {
+    updates.push('periode = ?');
+    params.push(data.periode);
+  }
+
+  if (data.tanggal_dibuat !== undefined) {
+    updates.push('tanggal_dibuat = ?');
+    params.push(data.tanggal_dibuat);
+  }
+
+  if (data.jumlah_pasien !== undefined) {
+    updates.push('jumlah_pasien = ?');
+    params.push(data.jumlah_pasien);
+  }
+
+  if (data.jumlah_kunjungan !== undefined) {
+    updates.push('jumlah_kunjungan = ?');
+    params.push(data.jumlah_kunjungan);
+  }
+
+  if (data.label !== undefined) {
+    updates.push('label = ?');
+    params.push(data.label);
+  }
+
+  if (updates.length === 0) {
+    return await getLaporanById(id_laporan);
+  }
+
+  params.push(id_laporan);
+
+  const query = `UPDATE laporan SET ${updates.join(', ')} WHERE id_laporan = ?`;
+  await db.query(query, params);
+
+  return await getLaporanById(id_laporan);
+};
+
+/**
+ * Hapus laporan
+ * @param {string} id_laporan - ID Laporan
+ * @returns {boolean} Status keberhasilan
+ */
+const deleteLaporan = async (id_laporan) => {
+  const query = `DELETE FROM laporan WHERE id_laporan = ?`;
+  const [result] = await db.query(query, [id_laporan]);
+
+  return result.affectedRows > 0;
+};
 
 /**
  * Hitung statistik ringkasan untuk periode tertentu
