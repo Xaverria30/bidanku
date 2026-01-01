@@ -12,6 +12,7 @@ import pasienService from '../../services/pasien.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
+import DataSampahLayanan from './DataSampahLayanan';
 
 function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -23,6 +24,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
   const [showPasienModal, setShowPasienModal] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   // State untuk popup jadwal
   const [showJadwalModal, setShowJadwalModal] = useState(false);
@@ -34,6 +36,49 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
     jam_mulai: '',
     jam_selesai: ''
   });
+  const [filterType, setFilterType] = useState('Semua Data');
+
+  const getFilteredData = () => {
+    if (!riwayatPelayanan) return [];
+    if (filterType === 'Semua Data') return riwayatPelayanan;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return riwayatPelayanan.filter(item => {
+      let dateStr = item.tanggal;
+      if (!dateStr) return false;
+
+      let itemDate = new Date(dateStr);
+      // Imunisasi uses DD/MM/YYYY mostly, check and parse
+      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      }
+
+      const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+
+      if (filterType === 'Hari Ini') {
+        return itemDay.getTime() === today.getTime();
+      }
+
+      if (filterType === 'Minggu Ini') {
+        const firstDay = new Date(today);
+        firstDay.setDate(today.getDate() - today.getDay()); // Minggu
+        const lastDay = new Date(today);
+        lastDay.setDate(today.getDate() + (6 - today.getDay())); // Sabtu
+        return itemDay >= firstDay && itemDay <= lastDay;
+      }
+
+      if (filterType === 'Bulan Ini') {
+        return itemDay.getMonth() === today.getMonth() && itemDay.getFullYear() === today.getFullYear();
+      }
+
+      return true;
+    });
+  };
+
+  const filteredRiwayat = getFilteredData();
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'Imunisasi',
@@ -70,8 +115,8 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
         const mappedData = response.data.map(item => ({
           id: item.id_pemeriksaan,
           nama_pasien: item.nama_pasien || item.nama || 'Pasien',
-          // Backend /api/imunisasi returns 'tanggal' as DD/MM/YYYY string
-          // Backend /api/pemeriksaan returns 'tanggal_pemeriksaan' as ISO string
+          // Backend /api/imunisasi mengembalikan 'tanggal' sebagai string DD/MM/YYYY
+          // Backend /api/pemeriksaan mengembalikan 'tanggal_pemeriksaan' sebagai string ISO
           tanggal: item.tanggal || item.tanggal_pemeriksaan,
           jenis_layanan: item.jenis_layanan
         }));
@@ -117,7 +162,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
           umur_ibu: fullPasien.umur,
           alamat_ibu: fullPasien.alamat,
           nomor_hp: fullPasien.no_hp,
-          // Auto-fill Suami (sebagai Ayah di form Imunisasi)
+          // Auto-fill Suami (sebagai Ayah d form Imunisasi)
           nama_ayah: husband.nama_suami || '',
           nik_ayah: husband.nik_suami || '',
           umur_ayah: husband.umur_suami || ''
@@ -138,7 +183,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
     setShowPasienModal(false);
     showNotifikasi({
       type: 'success',
-      message: 'Data Pasien Berhasil Dipilih!',
+      message: 'Data pasien berhasil dipilih!',
       autoClose: true,
       autoCloseDuration: 1500,
       onConfirm: hideNotifikasi
@@ -224,7 +269,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate required fields
+    // Validasi field yang wajib diisi
     if (!formData.tanggal || !formData.jenis_imunisasi || !formData.nama_ibu || !formData.nik_ibu || !formData.umur_ibu || !formData.alamat_ibu || !formData.nama_ayah || !formData.nik_ayah || !formData.nama_bayi || !formData.tanggal_lahir || !formData.nomor_hp) {
       showNotifikasi({
         type: 'error',
@@ -260,14 +305,14 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
         hideNotifikasi();
         setIsLoading(true);
 
-        console.log('=== SUBMIT DATA ===');
+        console.log('=== KIRIM DATA ===');
         console.log('editingId:', editingId);
-        console.log('formData being sent:', JSON.stringify(formData, null, 2));
+        console.log('formData yang dikirim:', JSON.stringify(formData, null, 2));
 
         try {
           let response;
           if (editingId) {
-            console.log('Calling updateImunisasi with:', editingId, formData);
+            console.log('Memanggil updateImunisasi dengan:', editingId, formData);
             response = await layananService.updateImunisasi(editingId, formData);
           } else {
             response = await layananService.createImunisasi(formData);
@@ -338,10 +383,10 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
 
   const handleEdit = async (id) => {
     try {
-      console.log('=== LOADING DATA FOR EDIT ===');
-      console.log('Loading data for id:', id);
+      console.log('=== MEMUAT DATA UNTUK DIEDIT ===');
+      console.log('Memuat data untuk id:', id);
       const response = await layananService.getImunisasiById(id);
-      console.log('Received data:', response.data);
+      console.log('Data diterima:', response.data);
       if (response.success) {
         const data = response.data;
         setFormData({
@@ -416,7 +461,9 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
   };
 
   const handleHeaderBack = () => {
-    if (showForm) {
+    if (showTrash) {
+      setShowTrash(false);
+    } else if (showForm) {
       handleBatal();
     } else {
       onBack();
@@ -432,13 +479,13 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
             <img src={pinkLogo} alt="Pink Logo" className="imunisasi-header-logo-img" />
           </div>
           <h1 className="imunisasi-header-title">
-            {showForm ? (editingId ? 'Edit Registrasi Layanan Imunisasi' : 'Formulir Registrasi Layanan Imunisasi') : 'Layanan Imunisasi'}
+            {showTrash ? 'Pemulihan Data Layanan Pasien' : (showForm ? (editingId ? 'Edit Registrasi Layanan Imunisasi' : 'Formulir Registrasi Layanan Imunisasi') : 'Layanan Imunisasi')}
           </h1>
         </div>
         <button className="btn-kembali-imunisasi" onClick={handleHeaderBack}>Kembali</button>
       </div>
 
-      {/* Main Content */}
+      {/* Konten Utama */}
       <div className="imunisasi-content">
         {/* Sidebar */}
         <Sidebar
@@ -455,11 +502,20 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
           onToImunisasi={onToImunisasi}
         />
 
-        {/* Main Area */}
+        {/* Area Utama */}
         <main className="imunisasi-main-area">
-          {!showForm ? (
+          {showTrash ? (
+            <DataSampahLayanan
+              title="Imunisasi"
+              onBack={() => setShowTrash(false)}
+              fetchDeleted={layananService.getDeletedImunisasi}
+              restoreItem={layananService.restoreImunisasi}
+              deleteItemPermanent={layananService.deletePermanentImunisasi}
+              onDataChanged={() => fetchRiwayatPelayanan(searchQuery)}
+            />
+          ) : !showForm ? (
             <>
-              {/* Welcome Message & Action Buttons */}
+              {/* Pesan Selamat Datang & Tombol Aksi */}
               <div className="imunisasi-welcome-section">
                 <p className="imunisasi-welcome-text">Selamat datang, {userData?.username || 'username'}!</p>
 
@@ -506,20 +562,26 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                     </button>
                     {showFilterDropdown && (
                       <div className="imunisasi-filter-dropdown">
-                        <div className="imunisasi-filter-option">Semua Data</div>
-                        <div className="imunisasi-filter-option">Hari Ini</div>
-                        <div className="imunisasi-filter-option">Minggu Ini</div>
-                        <div className="imunisasi-filter-option">Bulan Ini</div>
+                        <div className="imunisasi-filter-option" onClick={() => { setFilterType('Semua Data'); setShowFilterDropdown(false); }}>Semua Data</div>
+                        <div className="imunisasi-filter-option" onClick={() => { setFilterType('Hari Ini'); setShowFilterDropdown(false); }}>Hari Ini</div>
+                        <div className="imunisasi-filter-option" onClick={() => { setFilterType('Minggu Ini'); setShowFilterDropdown(false); }}>Minggu Ini</div>
+                        <div className="imunisasi-filter-option" onClick={() => { setFilterType('Bulan Ini'); setShowFilterDropdown(false); }}>Bulan Ini</div>
                       </div>
                     )}
                   </div>
+                  <button className="imunisasi-btn-pulihkan" onClick={() => setShowTrash(true)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                    </svg>
+                    Pulihkan Data
+                  </button>
                 </div>
 
                 <div className="imunisasi-riwayat-list">
                   {isLoading ? (
                     <div className="imunisasi-riwayat-loading">Memuat data...</div>
-                  ) : riwayatPelayanan.length > 0 ? (
-                    riwayatPelayanan.map((item) => (
+                  ) : filteredRiwayat.length > 0 ? (
+                    filteredRiwayat.map((item) => (
                       <div key={item.id} className="imunisasi-riwayat-item">
                         <span className="imunisasi-riwayat-text">
                           {item.nama_pasien} - {item.tanggal && item.tanggal.includes('/') ? item.tanggal : new Date(item.tanggal).toLocaleDateString('id-ID')}
@@ -617,16 +679,17 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                       type="button"
                       onClick={() => setShowPasienModal(true)}
                       style={{
-                        backgroundColor: '#e91e63',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: 'white',
+                        color: 'black',
+                        border: '1px solid #ddd',
                         padding: '8px 15px',
                         borderRadius: '5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '5px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
                       }}
                     >
                       <span>🔍</span> Cari Pasien

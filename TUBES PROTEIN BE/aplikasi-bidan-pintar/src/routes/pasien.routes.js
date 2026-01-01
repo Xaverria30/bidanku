@@ -17,6 +17,7 @@ router.use(verifyToken);
 // Route spesial (diletakkan di awal sebelum parameter :id)
 router.get('/deleted', pasienController.getDeletedPasien);
 router.put('/:id/restore', pasienController.restorePasien);
+router.delete('/permanent/:id', pasienController.deletePasienPermanent);
 
 // Operasi CRUD Pasien
 router.get('/', pasienController.getAllPasien);

@@ -12,6 +12,7 @@ import pasienService from '../../services/pasien.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
+import DataSampahLayanan from './DataSampahLayanan';
 
 function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [editingId, setEditingId] = useState(null);
@@ -19,6 +20,8 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
   const [showPasienModal, setShowPasienModal] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
+  const [filterType, setFilterType] = useState('Semua Data');
 
   // State untuk popup jadwal
   const [showJadwalModal, setShowJadwalModal] = useState(false);
@@ -54,6 +57,48 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  const getFilteredData = () => {
+    if (!riwayatPelayanan) return [];
+    if (filterType === 'Semua Data') return riwayatPelayanan;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return riwayatPelayanan.filter(item => {
+      let dateStr = item.tanggal;
+      if (!dateStr) return false;
+
+      // Handle potential DD/MM/YYYY format if any
+      let itemDate = new Date(dateStr);
+      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      }
+
+      const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+
+      if (filterType === 'Hari Ini') {
+        return itemDay.getTime() === today.getTime();
+      }
+
+      if (filterType === 'Minggu Ini') {
+        const firstDay = new Date(today);
+        firstDay.setDate(today.getDate() - today.getDay());
+        const lastDay = new Date(today);
+        lastDay.setDate(today.getDate() + (6 - today.getDay()));
+        return itemDay >= firstDay && itemDay <= lastDay;
+      }
+
+      if (filterType === 'Bulan Ini') {
+        return itemDay.getMonth() === today.getMonth() && itemDay.getFullYear() === today.getFullYear();
+      }
+
+      return true;
+    });
+  };
+
+  const filteredRiwayat = getFilteredData();
 
   useEffect(() => {
     fetchRiwayatPelayanan();
@@ -414,7 +459,9 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
   };
 
   const handleHeaderBack = () => {
-    if (showForm) {
+    if (showTrash) {
+      setShowTrash(false);
+    } else if (showForm) {
       handleBatal();
     } else {
       onBack();
@@ -429,7 +476,9 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
           <div className="kunjungan-header-logo">
             <img src={pinkLogo} alt="Pink Logo" className="kunjungan-header-logo-img" />
           </div>
-          <h1 className="kunjungan-header-title">Layanan Kunjungan Pasien</h1>
+          <h1 className="kunjungan-header-title">
+            {showTrash ? 'Pemulihan Data Layanan Pasien' : 'Layanan Kunjungan Pasien'}
+          </h1>
         </div>
         <button className="btn-kembali-kunjungan" onClick={handleHeaderBack}>Kembali</button>
       </div>
@@ -453,7 +502,16 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
 
         {/* Main Area */}
         <main className="kunjungan-main-area">
-          {!showForm ? (
+          {showTrash ? (
+            <DataSampahLayanan
+              title="Kunjungan Pasien"
+              onBack={() => setShowTrash(false)}
+              fetchDeleted={layananService.getDeletedKunjunganPasien}
+              restoreItem={layananService.restoreKunjunganPasien}
+              deleteItemPermanent={layananService.deletePermanentKunjunganPasien}
+              onDataChanged={() => fetchRiwayatPelayanan(searchQuery)}
+            />
+          ) : !showForm ? (
             <>
               {/* Welcome Section */}
               <div className="kunjungan-welcome-section">
@@ -497,25 +555,31 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                     </button>
                     {showFilterDropdown && (
                       <div className="kunjungan-filter-dropdown">
-                        <div className="kunjungan-filter-option">Semua Data</div>
-                        <div className="kunjungan-filter-option">Hari Ini</div>
-                        <div className="kunjungan-filter-option">Minggu Ini</div>
-                        <div className="kunjungan-filter-option">Bulan Ini</div>
+                        <div className="kunjungan-filter-option" onClick={() => { setFilterType('Semua Data'); setShowFilterDropdown(false); }}>Semua Data</div>
+                        <div className="kunjungan-filter-option" onClick={() => { setFilterType('Hari Ini'); setShowFilterDropdown(false); }}>Hari Ini</div>
+                        <div className="kunjungan-filter-option" onClick={() => { setFilterType('Minggu Ini'); setShowFilterDropdown(false); }}>Minggu Ini</div>
+                        <div className="kunjungan-filter-option" onClick={() => { setFilterType('Bulan Ini'); setShowFilterDropdown(false); }}>Bulan Ini</div>
                       </div>
                     )}
                   </div>
+                  <button className="kunjungan-btn-pulihkan" onClick={() => setShowTrash(true)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                    </svg>
+                    Pulihkan Data
+                  </button>
                 </div>
 
                 <div className="kunjungan-riwayat-list">
                   {isLoading ? (
                     <div style={{ textAlign: 'center', padding: '20px' }}>Memuat data...</div>
-                  ) : riwayatPelayanan.length === 0 ? (
+                  ) : filteredRiwayat.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>Belum ada data riwayat</div>
                   ) : (
-                    riwayatPelayanan.map((item) => (
+                    filteredRiwayat.map((item) => (
                       <div key={item.id} className="kunjungan-riwayat-item">
                         <span className="kunjungan-riwayat-text">
-                          {item.nama_pasien} - {item.tanggal}
+                          {item.nama_pasien} - {new Date(item.tanggal).toLocaleDateString('id-ID')}
                         </span>
                         <div className="kunjungan-riwayat-actions">
                           <button

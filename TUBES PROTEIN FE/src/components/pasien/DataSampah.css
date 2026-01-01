@@ -1,0 +1,237 @@
+/* Data Sampah Page */
+.data-sampah-page {
+    min-height: 100vh;
+    background: #F5F5F5;
+    padding: 0;
+    margin: 0;
+}
+
+/* Header */
+.ds-header {
+    background: white;
+    border: 1px solid #E89AC7;
+    margin: 20px;
+    border-radius: 15px;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(232, 154, 199, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.ds-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.ds-header-logo {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+}
+
+.ds-header-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ds-header-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    color: #333;
+}
+
+.btn-kembali-ds {
+    background: #C94C8B;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-kembali-ds:hover {
+    background: #B8417A;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 76, 139, 0.3);
+}
+
+/* Content Layout */
+.ds-content {
+    display: flex;
+    min-height: calc(100vh - 80px);
+    gap: 0;
+}
+
+/* Main Area */
+.ds-main-area {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+/* Card Container matches dp-card */
+.ds-card {
+    background: linear-gradient(180deg, #E090C0 0%, #D883B5 100%);
+    border-radius: 20px;
+    padding: 30px;
+    min-height: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.ds-card-header {
+    padding: 0 0 20px 0;
+    display: flex;
+    justify-content: flex-start;
+    /* Align search bar to left as per Image 2 */
+    align-items: center;
+    background: none;
+}
+
+.ds-card-body {
+    padding: 0;
+    background: transparent;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ds-section-title {
+    display: none;
+    /* Hide if not needed as per Image 2 */
+}
+
+/* Search Bar */
+.ds-search-bar {
+    margin: 0;
+    width: 300px;
+}
+
+.ds-search-input {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    outline: none;
+}
+
+.ds-search-input::placeholder {
+    color: #999;
+}
+
+/* List Items */
+.ds-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    flex: 1;
+    min-height: 400px;
+}
+
+.ds-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(190, 90, 140, 0.4);
+    /* Darker pink semi-transparent */
+    border-radius: 15px;
+    padding: 20px 30px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+.ds-item:hover {
+    background: rgba(190, 90, 140, 0.6);
+    transform: translateY(-2px);
+    box-shadow: none;
+}
+
+.ds-item-info h4 {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ds-item-info p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Restore Button */
+.btn-restore,
+.btn-delete-permanent {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-restore:hover,
+.btn-delete-permanent:hover {
+    opacity: 1;
+    background: none;
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+.btn-restore svg,
+.btn-delete-permanent svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Action Buttons Container */
+.ds-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.ds-loading,
+.ds-empty {
+    color: white;
+    text-align: center;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 500;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}

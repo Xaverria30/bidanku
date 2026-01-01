@@ -54,7 +54,7 @@ function DataSampah({
     const handleRestore = async (id, nama) => {
         showNotifikasi({
             type: 'confirm-save', // Reusing confirm dialog
-            message: `Pulihkan data pasien ${nama}?`,
+            message: `Apakah Anda ingin melakukan pemulihan (restore) terhadap data "${nama}"?`,
             onConfirm: async () => {
                 hideNotifikasi();
                 try {
@@ -88,6 +88,43 @@ function DataSampah({
         });
     };
 
+    const handlePermanentDelete = (pasienId) => {
+        showNotifikasi({
+            type: 'confirm-delete',
+            message: 'Penghapusan ini bersifat permanen. Apakah Anda yakin ingin melanjutkan?',
+            confirmText: 'Ya, hapus',
+            cancelText: 'Batal',
+            onConfirm: async () => {
+                hideNotifikasi();
+                try {
+                    const response = await pasienService.deletePasienPermanent(pasienId);
+                    if (response.success) {
+                        showNotifikasi({
+                            type: 'delete-success',
+                            autoClose: true,
+                            onConfirm: hideNotifikasi
+                        });
+                        fetchDeletedData(searchQuery);
+                    } else {
+                        showNotifikasi({
+                            type: 'error',
+                            message: response.message || 'Gagal menghapus data permanen',
+                            onConfirm: hideNotifikasi
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting pasien permanently:', error);
+                    showNotifikasi({
+                        type: 'error',
+                        message: 'Terjadi kesalahan saat menghapus data permanen',
+                        onConfirm: hideNotifikasi
+                    });
+                }
+            },
+            onCancel: hideNotifikasi
+        });
+    };
+
     return (
         <div className="data-sampah-page">
             {/* Header */}
@@ -104,7 +141,7 @@ function DataSampah({
             {/* Content */}
             <div className="ds-content">
                 <Sidebar
-                    activePage="data-sampah" // Ensure Sidebar handles this active state if needed, or defaults nicely
+                    activePage="data-sampah"
                     onRiwayatDataMasuk={onToRiwayatDataMasuk}
                     onRiwayatMasukAkun={onToRiwayatMasukAkun}
                     onProfilSaya={onToProfil}
@@ -118,47 +155,62 @@ function DataSampah({
                 />
 
                 <main className="ds-main-area">
-                    <div className="ds-container">
-                        <h2 className="ds-section-title">Data Pasien Terhapus</h2>
-
-                        <div className="ds-search-bar">
-                            <input
-                                type="text"
-                                className="ds-search-input"
-                                placeholder="Cari Data Terhapus"
-                                value={searchQuery}
-                                onChange={handleSearch}
-                            />
+                    <div className="ds-card">
+                        <div className="ds-card-header">
+                            <div className="ds-search-bar">
+                                <input
+                                    type="text"
+                                    className="ds-search-input"
+                                    placeholder="Cari Data Pasien"
+                                    value={searchQuery}
+                                    onChange={handleSearch}
+                                />
+                            </div>
                         </div>
 
-                        <div className="ds-list">
-                            {isLoading ? (
-                                <div style={{ color: 'white', textAlign: 'center' }}>Memuat data...</div>
-                            ) : deletedPasien.length > 0 ? (
-                                deletedPasien.map(item => (
-                                    <div key={item.id_pasien} className="ds-item">
-                                        <div className="ds-item-info">
-                                            <h4>{item.nama}</h4>
-                                            <p>Dihapus: {item.deleted_at ? new Date(item.deleted_at).toLocaleDateString() : 'N/A'}</p>
+                        <div className="ds-card-body">
+                            <div className="ds-list">
+                                {isLoading ? (
+                                    <div className="ds-loading">Memuat data...</div>
+                                ) : deletedPasien.length > 0 ? (
+                                    deletedPasien.map(item => (
+                                        <div key={item.id_pasien} className="ds-item">
+                                            <div className="ds-item-info">
+                                                <h4>{item.nama}</h4>
+                                                <p>Dihapus: {item.deleted_at ? new Date(item.deleted_at).toLocaleDateString() : 'N/A'}</p>
+                                            </div>
+                                            <div className="ds-actions">
+                                                <button
+                                                    className="btn-delete-permanent"
+                                                    onClick={() => handlePermanentDelete(item.id_pasien)}
+                                                    title="Hapus Permanen"
+                                                >
+                                                    <img
+                                                        src="https://img.icons8.com/ios-filled/50/delete-trash.png"
+                                                        alt="Delete"
+                                                        style={{ width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }}
+                                                    />
+                                                </button>
+                                                <button
+                                                    className="btn-restore"
+                                                    onClick={() => handleRestore(item.id_pasien, item.nama)}
+                                                    title="Pulihkan Data"
+                                                >
+                                                    <img
+                                                        src="https://img.icons8.com/windows/32/settings-backup-restore.png"
+                                                        alt="Restore"
+                                                        style={{ width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }}
+                                                    />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <button
-                                            className="btn-restore"
-                                            onClick={() => handleRestore(item.id_pasien, item.nama)}
-                                            title="Pulihkan Data"
-                                        >
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <polyline points="1 4 1 10 7 10"></polyline>
-                                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                                            </svg>
-                                            {/* Using a simpler restore icon */}
-                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="ds-empty">
+                                        Data tidak ditemukan.
                                     </div>
-                                ))
-                            ) : (
-                                <div style={{ color: 'white', textAlign: 'center', opacity: 0.8 }}>
-                                    Tidak ada data terhapus ditemukan
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </main>

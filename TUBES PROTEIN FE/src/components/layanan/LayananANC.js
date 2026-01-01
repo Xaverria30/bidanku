@@ -12,6 +12,7 @@ import pasienService from '../../services/pasien.service';
 import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
+import DataSampahLayanan from './DataSampahLayanan';
 
 function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
@@ -23,6 +24,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const { notifikasi, showNotifikasi, hideNotifikasi } = useNotifikasi();
   const [showPasienModal, setShowPasienModal] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   // State untuk popup jadwal
   const [showJadwalModal, setShowJadwalModal] = useState(false);
@@ -34,6 +36,48 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     jam_mulai: '',
     jam_selesai: ''
   });
+  const [filterType, setFilterType] = useState('Semua Data');
+
+  const getFilteredData = () => {
+    if (!riwayatPelayanan) return [];
+    if (filterType === 'Semua Data') return riwayatPelayanan;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return riwayatPelayanan.filter(item => {
+      let dateStr = item.tanggal;
+      if (!dateStr) return false;
+
+      let itemDate = new Date(dateStr);
+      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      }
+
+      const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+
+      if (filterType === 'Hari Ini') {
+        return itemDay.getTime() === today.getTime();
+      }
+
+      if (filterType === 'Minggu Ini') {
+        const firstDay = new Date(today);
+        firstDay.setDate(today.getDate() - today.getDay()); // Minggu
+        const lastDay = new Date(today);
+        lastDay.setDate(today.getDate() + (6 - today.getDay())); // Sabtu
+        return itemDay >= firstDay && itemDay <= lastDay;
+      }
+
+      if (filterType === 'Bulan Ini') {
+        return itemDay.getMonth() === today.getMonth() && itemDay.getFullYear() === today.getFullYear();
+      }
+
+      return true;
+    });
+  };
+
+  const filteredRiwayat = getFilteredData();
 
   const [formData, setFormData] = useState({
     jenis_layanan: 'ANC',
@@ -93,7 +137,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     const { name, value } = e.target;
     let finalValue = value;
 
-    // Convert number fields to integer
+    // Konversi field angka ke integer
     if (['umur_istri', 'umur_suami'].includes(name)) {
       finalValue = value ? parseInt(value, 10) : '';
     }
@@ -138,7 +182,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     setShowPasienModal(false);
     showNotifikasi({
       type: 'success',
-      message: 'Data Pasien Berhasil Dipilih!',
+      message: 'Data pasien berhasil dipilih!',
       autoClose: true,
       autoCloseDuration: 1500,
       onConfirm: hideNotifikasi
@@ -224,7 +268,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate required fields
+    // Validasi field yang wajib diisi
     if (!formData.tanggal || !formData.nama_istri || !formData.nik_istri || !formData.umur_istri || !formData.nama_suami || !formData.alamat) {
       showNotifikasi({
         type: 'error',
@@ -419,7 +463,9 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
   };
 
   const handleHeaderBack = () => {
-    if (showForm) {
+    if (showTrash) {
+      setShowTrash(false);
+    } else if (showForm) {
       handleBatal();
     } else {
       onBack();
@@ -435,13 +481,13 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
             <img src={pinkLogo} alt="Pink Logo" className="anc-header-logo-img" />
           </div>
           <h1 className="anc-header-title">
-            {showForm ? (editingId ? 'Edit Registrasi Layanan Antenatal Care (ANC)' : 'Formulir Registrasi Layanan Antenatal Care (ANC)') : 'Layanan Antenatal Care (ANC)'}
+            {showTrash ? 'Pemulihan Data Layanan Pasien' : (showForm ? (editingId ? 'Edit Registrasi Layanan Antenatal Care (ANC)' : 'Formulir Registrasi Layanan Antenatal Care (ANC)') : 'Layanan Antenatal Care (ANC)')}
           </h1>
         </div>
         <button className="btn-kembali-anc" onClick={handleHeaderBack}>Kembali</button>
       </div>
 
-      {/* Main Content */}
+      {/* Konten Utama */}
       <div className="anc-content">
         {/* Sidebar */}
         <Sidebar
@@ -458,11 +504,20 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
           onToImunisasi={onToImunisasi}
         />
 
-        {/* Main Area */}
+        {/* Area Utama */}
         <main className="anc-main-area">
-          {!showForm ? (
+          {showTrash ? (
+            <DataSampahLayanan
+              title="Antenatal Care (ANC)"
+              onBack={() => setShowTrash(false)}
+              fetchDeleted={layananService.getDeletedANC}
+              restoreItem={layananService.restoreANC}
+              deleteItemPermanent={layananService.deletePermanentANC}
+              onDataChanged={() => fetchRiwayatPelayanan(searchQuery)}
+            />
+          ) : !showForm ? (
             <>
-              {/* Welcome Message & Action Buttons */}
+              {/* Pesan Selamat Datang & Tombol Aksi */}
               <div className="anc-welcome-section">
                 <p className="anc-welcome-text">Selamat datang, {userData?.username || 'username'}!</p>
 
@@ -509,20 +564,26 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
                     </button>
                     {showFilterDropdown && (
                       <div className="anc-filter-dropdown">
-                        <div className="anc-filter-option">Semua Data</div>
-                        <div className="anc-filter-option">Hari Ini</div>
-                        <div className="anc-filter-option">Minggu Ini</div>
-                        <div className="anc-filter-option">Bulan Ini</div>
+                        <div className="anc-filter-option" onClick={() => { setFilterType('Semua Data'); setShowFilterDropdown(false); }}>Semua Data</div>
+                        <div className="anc-filter-option" onClick={() => { setFilterType('Hari Ini'); setShowFilterDropdown(false); }}>Hari Ini</div>
+                        <div className="anc-filter-option" onClick={() => { setFilterType('Minggu Ini'); setShowFilterDropdown(false); }}>Minggu Ini</div>
+                        <div className="anc-filter-option" onClick={() => { setFilterType('Bulan Ini'); setShowFilterDropdown(false); }}>Bulan Ini</div>
                       </div>
                     )}
                   </div>
+                  <button className="anc-btn-pulihkan" onClick={() => setShowTrash(true)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                    </svg>
+                    Pulihkan Data
+                  </button>
                 </div>
 
                 <div className="anc-riwayat-list">
                   {isLoading ? (
                     <div className="anc-riwayat-loading">Memuat data...</div>
-                  ) : riwayatPelayanan.length > 0 ? (
-                    riwayatPelayanan.map((item) => (
+                  ) : filteredRiwayat.length > 0 ? (
+                    filteredRiwayat.map((item) => (
                       <div key={item.id} className="anc-riwayat-item">
                         <span className="anc-riwayat-text">
                           {item.nama_pasien} - {new Date(item.tanggal).toLocaleDateString('id-ID')}
@@ -621,16 +682,17 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
                       type="button"
                       onClick={() => setShowPasienModal(true)}
                       style={{
-                        backgroundColor: '#e91e63',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: 'white',
+                        color: 'black',
+                        border: '1px solid #ddd',
                         padding: '8px 15px',
                         borderRadius: '5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '5px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
                       }}
                     >
                       <span>🔍</span> Cari Pasien

@@ -16,7 +16,7 @@ const getAllPasien = async (search = null) => {
   let query = 'SELECT * FROM pasien';
   const params = [];
 
-  query += ' WHERE deleted_at IS NULL';
+  query += ' WHERE deleted_at IS NULL AND is_permanent_deleted = 0';
   if (search) {
     query += ' AND (nama LIKE ? OR nik LIKE ?)';
     params.push(`%${search}%`, `%${search}%`);
@@ -33,7 +33,7 @@ const getAllPasien = async (search = null) => {
  * @returns {Array} Daftar pasien terhapus
  */
 const getDeletedPasien = async (search) => {
-  let query = 'SELECT * FROM pasien WHERE deleted_at IS NOT NULL';
+  let query = 'SELECT * FROM pasien WHERE deleted_at IS NOT NULL AND is_permanent_deleted = 0';
   const params = [];
 
   if (search) {
@@ -69,7 +69,7 @@ const getLastFamilyData = async (id_pasien) => {
 
   // Cek ANC (nama_suami)
   const [anc] = await db.query(
-    `SELECT anc.nama_suami, NULL as nik_suami, NULL as umur_suami
+    `SELECT anc.nama_suami, anc.nik_suami, anc.umur_suami
      FROM layanan_anc anc
      JOIN pemeriksaan p ON anc.id_pemeriksaan = p.id_pemeriksaan
      WHERE p.id_pasien = ? AND p.deleted_at IS NULL
@@ -80,7 +80,7 @@ const getLastFamilyData = async (id_pasien) => {
 
   // Cek KB (nama_ayah is suami)
   const [kb] = await db.query(
-    `SELECT kb.nama_ayah as nama_suami, NULL as nik_suami, kb.umur_ayah as umur_suami
+    `SELECT kb.nama_ayah as nama_suami, kb.nik_ayah as nik_suami, kb.umur_ayah as umur_suami
      FROM layanan_kb kb
      JOIN pemeriksaan p ON kb.id_pemeriksaan = p.id_pemeriksaan
      WHERE p.id_pasien = ? AND p.deleted_at IS NULL
@@ -201,6 +201,43 @@ const restorePasien = async (id, userId) => {
 };
 
 /**
+ * Hapus pasien secara permanen (Hard Delete)
+ * @param {string} id - ID Pasien
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Hasil penghapusan
+ */
+/**
+ * Hapus pasien secara permanen (Fake Hard Delete untuk menjaga referensi log)
+ * @param {string} id - ID Pasien
+ * @param {string} userId - ID Pengguna
+ * @returns {Object} Hasil penghapusan
+ */
+const deletePasienPermanent = async (id, userId) => {
+  // Kita tidak melakukan DELETE fisik karena akan menghilangkan Nama Pasien di Audit Log
+  // Solusi: Tandai sebagai permanent deleted, dan acak NIK agar bisa dipakai ulang
+  const scrambledNik = `DEL-${uuidv4().substring(0, 8)}-${Date.now()}`;
+
+  const query = `
+    UPDATE pasien 
+    SET is_permanent_deleted = 1, 
+        deleted_at = NOW(), 
+        nik = ? 
+    WHERE id_pasien = ?
+  `;
+
+  const [result] = await db.query(query, [scrambledNik, id]);
+
+  if (result.affectedRows > 0) {
+    await auditService.recordDataLog(userId, 'DELETE_PERMANENT', 'pasien', id);
+
+    // Opsional: Hapus data sensitif lain jika perlu (alamat, hp), tapi Nama tetap disimpan
+    // await db.query('UPDATE pasien SET alamat = NULL, no_hp = NULL WHERE id_pasien = ?', [id]);
+  }
+
+  return result;
+};
+
+/**
  * Ambil riwayat pemeriksaan pasien
  * @param {string} id - ID Pasien
  * @returns {Array} Riwayat pemeriksaan
@@ -227,23 +264,25 @@ const findOrCreatePasien = async (data, connection) => {
   let id_pasien;
   let existingPasien = [];
 
-  // Hanya cek NIK jika ada dan valid
-  if (nik && nik.trim().length > 0) {
-    [existingPasien] = await connection.query(
-      'SELECT id_pasien FROM pasien WHERE nik = ?',
-      [nik]
-    );
+  // NIK Wajib diisi untuk mencegah data ganda
+  if (!nik || nik.trim().length === 0) {
+    throw new Error('NIK Pasien wajib diisi untuk identifikasi data.');
   }
+
+  [existingPasien] = await connection.query(
+    'SELECT id_pasien FROM pasien WHERE nik = ?',
+    [nik]
+  );
 
   if (existingPasien.length > 0) {
     id_pasien = existingPasien[0].id_pasien;
-    // Update data pasien yang ada dan restore jika terhapus
+    // Perbarui data pasien yang ada dan pulihkan jika terhapus
     await connection.query(
       'UPDATE pasien SET nama = ?, umur = ?, alamat = ?, no_hp = ?, deleted_at = NULL WHERE id_pasien = ?',
       [nama, umur, alamat, no_hp || null, id_pasien]
     );
   } else {
-    // Buat pasien baru
+    // Buat data pasien baru
     id_pasien = uuidv4();
     await connection.query(
       'INSERT INTO pasien (id_pasien, nama, nik, umur, alamat, no_hp) VALUES (?, ?, ?, ?, ?, ?)',
@@ -263,5 +302,6 @@ module.exports = {
   getRiwayatPasien,
   findOrCreatePasien,
   restorePasien,
-  getDeletedPasien
+  getDeletedPasien,
+  deletePasienPermanent
 };

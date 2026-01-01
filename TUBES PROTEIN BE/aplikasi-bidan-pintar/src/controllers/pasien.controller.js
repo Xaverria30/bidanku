@@ -160,6 +160,27 @@ const restorePasien = async (req, res) => {
   }
 };
 
+/**
+ * Hapus pasien permanen (Hard Delete)
+ * DELETE /api/pasien/permanent/:id
+ */
+const deletePasienPermanent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const result = await pasienService.deletePasienPermanent(id, userId);
+
+    if (result.affectedRows === 0) {
+      return notFound(res, 'Pasien tidak ditemukan');
+    }
+
+    return success(res, 'Pasien berhasil dihapus permanen');
+  } catch (error) {
+    return serverError(res, 'Gagal menghapus pasien secara permanen', error);
+  }
+};
+
 module.exports = {
   getAllPasien,
   getPasienById,
@@ -168,5 +189,6 @@ module.exports = {
   deletePasien,
   getRiwayatPasien,
   getDeletedPasien,
-  restorePasien
+  restorePasien,
+  deletePasienPermanent
 };
