@@ -269,7 +269,7 @@ CREATE TABLE layanan_kunjungan_pasien (
     id_pemeriksaan CHAR(36) NOT NULL,
     tanggal DATE NOT NULL,
     no_reg VARCHAR(50),
-    jenis_kunjungan ENUM('Bayi','Anak', 'Hamil','Nifas', 'KB', 'Lansia') NOT NULL,
+    jenis_kunjungan ENUM('Bayi/Anak', 'Hamil','Nifas', 'KB', 'Lansia') NOT NULL,
     nama_pasien VARCHAR(100) NOT NULL,
     nik_pasien CHAR(16),
     umur_pasien VARCHAR(20) COMMENT 'Format: "6 bln" atau "2 thn"',
