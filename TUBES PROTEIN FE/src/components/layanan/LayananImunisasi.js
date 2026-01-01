@@ -49,17 +49,27 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       let dateStr = item.tanggal;
       if (!dateStr) return false;
 
-      let itemDate = new Date(dateStr);
-      // Imunisasi uses DD/MM/YYYY mostly, check and parse
-      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+      // Ensure we have a valid Date object
+      let itemDate;
+      if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts[0].length === 4) {
+          itemDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        } else {
+          itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      } else {
+        itemDate = new Date(dateStr);
       }
+
+      if (isNaN(itemDate.getTime())) return false;
 
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getTime() === today.getTime();
+        return itemDay.getFullYear() === today.getFullYear() && 
+               itemDay.getMonth() === today.getMonth() && 
+               itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -557,8 +567,13 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                     <button
                       className="imunisasi-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      style={{ 
+                        background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
+                        borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)'
+                      }}
                     >
                       <img src={filterIcon} alt="Filter" style={{ width: '20px', height: '20px' }} />
+                      {filterType !== 'Semua Data' && <span style={{ marginLeft: '8px', fontSize: '12px', fontWeight: 'bold' }}>{filterType}</span>}
                     </button>
                     {showFilterDropdown && (
                       <div className="imunisasi-filter-dropdown">
@@ -584,7 +599,15 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                     filteredRiwayat.map((item) => (
                       <div key={item.id} className="imunisasi-riwayat-item">
                         <span className="imunisasi-riwayat-text">
-                          {item.nama_pasien} - {item.tanggal && item.tanggal.includes('/') ? item.tanggal : new Date(item.tanggal).toLocaleDateString('id-ID')}
+                          {item.nama_pasien} - {(() => {
+                            if (!item.tanggal) return '-';
+                            const d = new Date(item.tanggal);
+                            if (isNaN(d.getTime())) return item.tanggal;
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            return `${day}/${month}/${year}`;
+                          })()}
                         </span>
                         <div className="imunisasi-riwayat-actions">
                           <button className="imunisasi-btn-edit" onClick={() => handleEdit(item.id)}>

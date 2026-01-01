@@ -46,27 +46,37 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     return riwayatPelayanan.filter(item => {
-      let dateStr = item.tanggal; // item.tanggal is mapped from item.tanggal_pemeriksaan in fetch
+      let dateStr = item.tanggal;
       if (!dateStr) return false;
 
-      // Handle potential DD/MM/YYYY format if any (standard is YYYY-MM-DD or ISO from backend)
-      let itemDate = new Date(dateStr);
-      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+      // Ensure we have a valid Date object
+      let itemDate;
+      if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (parts[0].length === 4) {
+          itemDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        } else {
+          itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      } else {
+        itemDate = new Date(dateStr);
       }
+
+      if (isNaN(itemDate.getTime())) return false;
 
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getTime() === today.getTime();
+        return itemDay.getFullYear() === today.getFullYear() && 
+               itemDay.getMonth() === today.getMonth() && 
+               itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
         const firstDay = new Date(today);
-        firstDay.setDate(today.getDate() - today.getDay()); // Sunday
+        firstDay.setDate(today.getDate() - today.getDay());
         const lastDay = new Date(today);
-        lastDay.setDate(today.getDate() + (6 - today.getDay())); // Saturday
+        lastDay.setDate(today.getDate() + (6 - today.getDay()));
         return itemDay >= firstDay && itemDay <= lastDay;
       }
 
@@ -117,7 +127,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
         const mappedData = response.data.map(item => ({
           id: item.id_pemeriksaan,
           nama_pasien: item.nama_pasien || 'Pasien',
-          tanggal: item.tanggal_pemeriksaan,
+          tanggal: item.tanggal || item.tanggal_pemeriksaan,
           jenis_layanan: item.jenis_layanan
         }));
         setRiwayatPelayanan(mappedData);
@@ -584,8 +594,15 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
                     <button
                       className="kb-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      style={{ 
+                        background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
+                        borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                        width: filterType !== 'Semua Data' ? 'auto' : '45px',
+                        padding: filterType !== 'Semua Data' ? '0 15px' : '10px'
+                      }}
                     >
                       <img src={filterIcon} alt="Filter" style={{ width: '20px', height: '20px' }} />
+                      {filterType !== 'Semua Data' && <span style={{ marginLeft: '8px', fontSize: '12px', fontWeight: 'bold', color: 'white' }}>{filterType}</span>}
                     </button>
                     {showFilterDropdown && (
                       <div className="kb-filter-dropdown">
@@ -611,7 +628,15 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
                     filteredRiwayat.map((item) => (
                       <div key={item.id} className="kb-riwayat-item">
                         <span className="kb-riwayat-text">
-                          {item.nama_pasien} - {new Date(item.tanggal).toLocaleDateString('id-ID')}
+                          {item.nama_pasien} - {(() => {
+                            if (!item.tanggal) return '-';
+                            const d = new Date(item.tanggal);
+                            if (isNaN(d.getTime())) return item.tanggal;
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            return `${day}/${month}/${year}`;
+                          })()}
                         </span>
                         <div className="kb-riwayat-actions">
                           <button className="kb-btn-edit" onClick={() => handleEdit(item.id)}>

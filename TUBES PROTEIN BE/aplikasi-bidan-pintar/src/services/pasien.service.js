@@ -244,9 +244,23 @@ const deletePasienPermanent = async (id, userId) => {
  */
 const getRiwayatPasien = async (id) => {
   const query = `
-    SELECT * FROM pemeriksaan 
-    WHERE id_pasien = ? 
-    ORDER BY tanggal_pemeriksaan DESC
+    SELECT 
+      p.*,
+      COALESCE(
+        anc.no_reg_baru, anc.no_reg_lama, 
+        kb.nomor_registrasi_baru, kb.nomor_registrasi_lama, 
+        pers.no_reg_baru, pers.no_reg_lama, 
+        imun.no_reg, 
+        kjung.no_reg
+      ) AS nomor_registrasi
+    FROM pemeriksaan p
+    LEFT JOIN layanan_anc anc ON p.id_pemeriksaan = anc.id_pemeriksaan
+    LEFT JOIN layanan_kb kb ON p.id_pemeriksaan = kb.id_pemeriksaan
+    LEFT JOIN layanan_persalinan pers ON p.id_pemeriksaan = pers.id_pemeriksaan
+    LEFT JOIN layanan_imunisasi imun ON p.id_pemeriksaan = imun.id_pemeriksaan
+    LEFT JOIN layanan_kunjungan_pasien kjung ON p.id_pemeriksaan = kjung.id_pemeriksaan
+    WHERE p.id_pasien = ? 
+    ORDER BY p.tanggal_pemeriksaan DESC
   `;
   const [rows] = await db.query(query, [id]);
   return rows;

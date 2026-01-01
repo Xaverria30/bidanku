@@ -49,23 +49,35 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
       let dateStr = item.tanggal;
       if (!dateStr) return false;
 
-      let itemDate = new Date(dateStr);
-      if (isNaN(itemDate.getTime()) && typeof dateStr === 'string' && dateStr.includes('/')) {
+      // Ensure we have a valid Date object
+      let itemDate;
+      if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
-        itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        // Handle DD/MM/YYYY or YYYY/MM/DD
+        if (parts[0].length === 4) {
+          itemDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        } else {
+          itemDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      } else {
+        itemDate = new Date(dateStr);
       }
+
+      if (isNaN(itemDate.getTime())) return false;
 
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getTime() === today.getTime();
+        return itemDay.getFullYear() === today.getFullYear() && 
+               itemDay.getMonth() === today.getMonth() && 
+               itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
         const firstDay = new Date(today);
-        firstDay.setDate(today.getDate() - today.getDay()); // Minggu
+        firstDay.setDate(today.getDate() - today.getDay());
         const lastDay = new Date(today);
-        lastDay.setDate(today.getDate() + (6 - today.getDay())); // Sabtu
+        lastDay.setDate(today.getDate() + (6 - today.getDay()));
         return itemDay >= firstDay && itemDay <= lastDay;
       }
 
@@ -120,7 +132,7 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
         const mappedData = response.data.map(item => ({
           id: item.id_pemeriksaan,
           nama_pasien: item.nama_pasien || 'Pasien',
-          tanggal: item.tanggal,
+          tanggal: item.tanggal || item.tanggal_pemeriksaan,
           jenis_layanan: item.jenis_layanan
         }));
         setRiwayatPelayanan(mappedData);
@@ -480,9 +492,7 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
             <img src={pinkLogo} alt="Pink Logo" className="persalinan-header-logo-img" />
           </div>
           <h1 className="persalinan-header-title">
-            <h1 className="persalinan-header-title">
-              {showTrash ? 'Pemulihan Data Layanan Pasien' : (showForm ? (editingId ? 'Edit Registrasi Layanan Persalinan' : 'Formulir Registrasi Layanan Persalinan') : 'Layanan Persalinan')}
-            </h1>
+            {showTrash ? 'Pemulihan Data Layanan Pasien' : (showForm ? (editingId ? 'Edit Registrasi Layanan Persalinan' : 'Formulir Registrasi Layanan Persalinan') : 'Layanan Persalinan')}
           </h1>
         </div>
         <button className="btn-kembali-persalinan" onClick={handleHeaderBack}>Kembali</button>
@@ -560,8 +570,13 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
                     <button
                       className="persalinan-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      style={{ 
+                        background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
+                        borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)'
+                      }}
                     >
                       <img src={filterIcon} alt="Filter" style={{ width: '20px', height: '20px' }} />
+                      {filterType !== 'Semua Data' && <span style={{ marginLeft: '8px', fontSize: '12px', fontWeight: 'bold' }}>{filterType}</span>}
                     </button>
                     {showFilterDropdown && (
                       <div className="persalinan-filter-dropdown">
@@ -587,7 +602,15 @@ function LayananPersalinan({ onBack, userData, onToRiwayatDataMasuk, onToRiwayat
                     filteredRiwayat.map((item) => (
                       <div key={item.id} className="persalinan-riwayat-item">
                         <span className="persalinan-riwayat-text">
-                          {item.nama_pasien} - {item.tanggal}
+                          {item.nama_pasien} - {(() => {
+                            if (!item.tanggal) return '-';
+                            const d = new Date(item.tanggal);
+                            if (isNaN(d.getTime())) return item.tanggal;
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            return `${day}/${month}/${year}`;
+                          })()}
                         </span>
                         <div className="persalinan-riwayat-actions">
                           <button className="persalinan-btn-edit" onClick={() => handleEdit(item.id)}>

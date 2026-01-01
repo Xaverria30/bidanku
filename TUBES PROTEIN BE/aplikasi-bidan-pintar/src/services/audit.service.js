@@ -142,13 +142,14 @@ const getDetailedDataLogs = async (filters = {}) => {
         a.created_at AS tanggal,
         u.username AS diubah_oleh,
         COALESCE(p.nama, p_anc.nama, p_kb.nama, p_pers.nama, p_imun.nama, p_kjung.nama, p_jadwal.nama, p_direct.nama) AS nama_pasien,
-        COALESCE(
-          anc.no_reg_baru, anc.no_reg_lama, 
-          kb.nomor_registrasi_baru, kb.nomor_registrasi_lama, 
-          pers.no_reg_baru, pers.no_reg_lama, 
-          imun.no_reg, 
-          kjung.no_reg
-        ) AS nomor_registrasi
+        CASE 
+          WHEN a.description = 'layanan_anc' THEN COALESCE(anc.no_reg_baru, anc.no_reg_lama)
+          WHEN a.description = 'layanan_kb' THEN COALESCE(kb.nomor_registrasi_baru, kb.nomor_registrasi_lama)
+          WHEN a.description = 'layanan_persalinan' THEN COALESCE(pers.no_reg_baru, pers.no_reg_lama)
+          WHEN a.description = 'layanan_imunisasi' THEN imun.no_reg
+          WHEN a.description = 'layanan_kunjungan_pasien' THEN kjung.no_reg
+          ELSE NULL
+        END AS nomor_registrasi
       FROM audit_logs a
       LEFT JOIN users u ON a.id_user = u.id_user
       
