@@ -151,12 +151,15 @@ const createJadwal = async (data) => {
   const { id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai } = data;
   const id_jadwal = uuidv4();
 
+  // Fix Date Format: Ensure compatible with MySQL DATE
+  const tanggal_fixed = new Date(tanggal).toISOString().split('T')[0];
+
   const query = `
     INSERT INTO jadwal (id_jadwal, id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  await db.query(query, [id_jadwal, id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai]);
+  await db.query(query, [id_jadwal, id_pasien, id_petugas, jenis_layanan, tanggal_fixed, jam_mulai, jam_selesai]);
 
   return { id_jadwal, ...data };
 };
@@ -191,13 +194,16 @@ const getDetailJadwal = async (id_jadwal) => {
 const updateJadwal = async (id_jadwal, data) => {
   const { id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai } = data;
 
+  // Fix Date Format: Ensure compatible with MySQL DATE
+  const tanggal_fixed = new Date(tanggal).toISOString().split('T')[0];
+
   const query = `
     UPDATE jadwal 
     SET id_pasien = ?, id_petugas = ?, jenis_layanan = ?, tanggal = ?, jam_mulai = ?, jam_selesai = ?
     WHERE id_jadwal = ?
   `;
 
-  await db.query(query, [id_pasien, id_petugas, jenis_layanan, tanggal, jam_mulai, jam_selesai, id_jadwal]);
+  await db.query(query, [id_pasien, id_petugas, jenis_layanan, tanggal_fixed, jam_mulai, jam_selesai, id_jadwal]);
 
   return { id_jadwal, ...data };
 };
