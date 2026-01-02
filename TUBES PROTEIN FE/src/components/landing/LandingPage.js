@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import bidanYeye from '../../assets/images/bidan-yeye.jpg';
-import pinkLogo from '../../assets/images/pink-logo.png';
+import pinkLogo from '../../assets/images/logo-stetoskop.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -52,7 +52,9 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="header-container">
           <div className="logo-section" onClick={() => navigate('/beranda')}>
-            <div className="logo-icon">🏥</div>
+            <div className="header-logo-wrapper">
+              <img src={pinkLogo} alt="Logo" />
+            </div>
             <div className="logo-details">
               <h1 className="logo-text">Rumah Muaffa Bidan Yeye</h1>
               <p className="logo-subtitle">SISTEM INFORMASI BIDAN DIGITAL</p>
