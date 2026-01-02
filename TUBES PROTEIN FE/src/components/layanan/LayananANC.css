@@ -30,20 +30,26 @@
 }
 
 .anc-header-logo {
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
 }
 
 .anc-header-logo-img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .anc-header-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   color: #333;
   text-shadow: none;
 }
@@ -306,6 +312,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -561,28 +568,28 @@
   .anc-content {
     flex-direction: column;
   }
-  
+
   .anc-sidebar {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
     padding: 20px;
   }
-  
+
   .anc-sidebar-profile {
     flex-direction: row;
   }
-  
+
   .anc-profile-avatar {
     width: 60px;
     height: 60px;
   }
-  
+
   .anc-sidebar-menu {
     flex-direction: row;
     gap: 15px;
   }
-  
+
   .btn-profil-anc {
     width: auto;
     padding: 8px 16px;
@@ -593,27 +600,27 @@
   .anc-header {
     padding: 15px 20px;
   }
-  
+
   .anc-header-title {
     font-size: 16px;
   }
-  
+
   .anc-main-area {
     padding: 20px;
   }
-  
+
   .anc-action-buttons {
     flex-direction: column;
   }
-  
+
   .anc-form-row {
     flex-direction: column;
   }
-  
+
   .anc-sidebar {
     flex-direction: column;
   }
-  
+
   .anc-sidebar-menu {
     flex-direction: column;
   }
@@ -632,7 +639,7 @@
   .anc-header-title {
     font-size: 14px;
   }
-  
+
   .btn-kembali-anc {
     padding: 8px 16px;
     font-size: 12px;
@@ -641,11 +648,11 @@
   .anc-content {
     flex-direction: column;
   }
-  
+
   .anc-form-container {
     padding: 15px;
   }
-  
+
   .anc-form-section {
     padding: 12px;
   }

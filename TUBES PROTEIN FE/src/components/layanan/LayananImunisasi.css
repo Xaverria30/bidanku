@@ -30,20 +30,26 @@
 }
 
 .imunisasi-header-logo {
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
 }
 
 .imunisasi-header-logo-img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .imunisasi-header-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   color: #333;
   text-shadow: none;
 }
@@ -306,6 +312,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -561,28 +568,28 @@
   .imunisasi-content {
     flex-direction: column;
   }
-  
+
   .imunisasi-sidebar {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
     padding: 20px;
   }
-  
+
   .imunisasi-sidebar-profile {
     flex-direction: row;
   }
-  
+
   .imunisasi-profile-avatar {
     width: 60px;
     height: 60px;
   }
-  
+
   .imunisasi-sidebar-menu {
     flex-direction: row;
     gap: 15px;
   }
-  
+
   .btn-profil-imunisasi {
     width: auto;
     padding: 8px 16px;
@@ -593,27 +600,27 @@
   .imunisasi-header {
     padding: 15px 20px;
   }
-  
+
   .imunisasi-header-title {
     font-size: 16px;
   }
-  
+
   .imunisasi-main-area {
     padding: 20px;
   }
-  
+
   .imunisasi-action-buttons {
     flex-direction: column;
   }
-  
+
   .imunisasi-form-row {
     flex-direction: column;
   }
-  
+
   .imunisasi-sidebar {
     flex-direction: column;
   }
-  
+
   .imunisasi-sidebar-menu {
     flex-direction: column;
   }
@@ -632,7 +639,7 @@
   .imunisasi-header-title {
     font-size: 14px;
   }
-  
+
   .btn-kembali-imunisasi {
     padding: 8px 16px;
     font-size: 12px;
@@ -641,11 +648,11 @@
   .imunisasi-content {
     flex-direction: column;
   }
-  
+
   .imunisasi-form-container {
     padding: 15px;
   }
-  
+
   .imunisasi-form-section {
     padding: 12px;
   }
