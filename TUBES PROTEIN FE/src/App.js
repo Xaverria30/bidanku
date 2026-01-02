@@ -475,8 +475,8 @@ function App() {
                 onToImunisasi={handleToImunisasi}
                 onToKunjunganPasien={handleToKunjunganPasien}
                 userData={userData}
-                onToRiwayatDataMasuk={handleToRiwayatDataMasuk}
-                onToRiwayatMasukAkun={handleToRiwayatMasukAkun}
+                onRiwayatDataMasuk={handleToRiwayatDataMasuk}
+                onRiwayatMasukAkun={handleToRiwayatMasukAkun}
                 onToProfil={handleToProfil}
                 onToTambahPasien={handleToTambahPasien}
                 onToTambahPengunjung={handleToTambahPengunjung}
