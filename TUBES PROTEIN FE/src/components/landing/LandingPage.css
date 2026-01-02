@@ -248,9 +248,10 @@ html {
 }
 
 .card-label {
-  font-size: 0.75rem;
-  color: #666666;
-  font-weight: 500;
+  font-size: 0.85rem;
+  color: #666666 !important;
+  font-weight: 600;
+  display: block;
 }
 
 .card-name {
