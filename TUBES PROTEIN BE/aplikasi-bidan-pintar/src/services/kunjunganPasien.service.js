@@ -132,10 +132,14 @@ const createRegistrasiKunjunganPasien = async (data, userId) => {
     const analisa_final = analisa || diagnosa || '-';
     const tatalaksana_final = tatalaksana || `Terapi: ${terapi_obat || '-'}. ${keterangan || ''}`;
 
+    // Fix Date Format: Ensure compatible with MySQL DATE/DATETIME
+    // Input might be ISO string (e.g., 2025-12-13T00:00:00.000Z), which MySQL rejects in strict mode
+    const tanggal_fixed = new Date(tanggal).toISOString().split('T')[0];
+
     await connection.query(
       `INSERT INTO pemeriksaan (id_pemeriksaan, id_pasien, jenis_layanan, subjektif, objektif, analisa, tatalaksana, tanggal_pemeriksaan)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id_pemeriksaan, id_pasien, 'Kunjungan Pasien', subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal]
+      [id_pemeriksaan, id_pasien, 'Kunjungan Pasien', subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal_fixed]
     );
 
     // 3. Buat record spesifik kunjungan
@@ -143,7 +147,7 @@ const createRegistrasiKunjunganPasien = async (data, userId) => {
     await connection.query(
       `INSERT INTO layanan_kunjungan_pasien (id_kunjungan, id_pemeriksaan, tanggal, no_reg, jenis_kunjungan, nama_pasien, nik_pasien, umur_pasien, bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id_kunjungan, id_pemeriksaan, tanggal, no_reg_sanitized, jenis_kunjungan_fixed, nama_pasien, nik_pasien, umur_pasien, bb_pasien_sanitized, td_pasien_sanitized, nama_wali_sanitized, nik_wali_sanitized, umur_wali_sanitized, keluhan, diagnosa, terapi_obat_sanitized, keterangan_sanitized]
+      [id_kunjungan, id_pemeriksaan, tanggal_fixed, no_reg_sanitized, jenis_kunjungan_fixed, nama_pasien, nik_pasien, umur_pasien, bb_pasien_sanitized, td_pasien_sanitized, nama_wali_sanitized, nik_wali_sanitized, umur_wali_sanitized, keluhan, diagnosa, terapi_obat_sanitized, keterangan_sanitized]
     );
 
     await connection.commit();
@@ -211,11 +215,14 @@ const updateKunjunganPasien = async (id, data, userId) => {
     const analisa_final = diagnosa || '-';
     const tatalaksana_final = `Terapi: ${terapi_obat || '-'}. ${keterangan || ''}`;
 
+    // Fix Date Format for Update
+    const tanggal_fixed = new Date(tanggal).toISOString().split('T')[0];
+
     await connection.query(
       `UPDATE pemeriksaan 
        SET subjektif = ?, objektif = ?, analisa = ?, tatalaksana = ?, tanggal_pemeriksaan = ?
        WHERE id_pemeriksaan = ?`,
-      [subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal, id_pemeriksaan]
+      [subjektif_final, objektif_final, analisa_final, tatalaksana_final, tanggal_fixed, id_pemeriksaan]
     );
 
     // Update record kunjungan
@@ -227,7 +234,7 @@ const updateKunjunganPasien = async (id, data, userId) => {
            bb_pasien = ?, td_pasien = ?, nama_wali = ?, nik_wali = ?, umur_wali = ?, 
            keluhan = ?, diagnosa = ?, terapi_obat = ?, keterangan = ?
        WHERE id_kunjungan = ?`,
-      [tanggal, no_reg, jenis_kunjungan, bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan, id]
+      [tanggal_fixed, no_reg, jenis_kunjungan, bb_pasien, td_pasien, nama_wali, nik_wali, umur_wali, keluhan, diagnosa, terapi_obat, keterangan, id]
     );
 
     await connection.commit();
