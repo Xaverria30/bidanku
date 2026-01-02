@@ -11,20 +11,28 @@ const AboutPage = () => {
             {/* Header/Navigation */}
             <header className="landing-header">
                 <div className="header-container">
-                    <div className="logo-section" onClick={() => navigate('/')}>
+                    <div className="logo-section" onClick={() => navigate('/beranda')}>
                         <div className="logo-icon">🏥</div>
-                        <h1 className="logo-text">Rumah Muaffa Bidan Yeye</h1>
-                        <p className="logo-subtitle">SISTEM INFORMASI BIDAN DIGITAL</p>
+                        <div className="logo-details">
+                            <h1 className="logo-text">Rumah Muaffa Bidan Yeye</h1>
+                            <p className="logo-subtitle">SISTEM INFORMASI BIDAN DIGITAL</p>
+                        </div>
                     </div>
                     <nav className="nav-menu">
                         <button
                             className="nav-link"
                             style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/beranda')}
                         >
                             Beranda
                         </button>
-                        <a href="/tentang" className="nav-link active" onClick={(e) => { e.preventDefault(); }}>Tentang</a>
+                        <button
+                            className="nav-link active"
+                            style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+                            onClick={() => navigate('/tentang')}
+                        >
+                            Tentang
+                        </button>
                         <button
                             className="btn-masuk"
                             onClick={() => navigate('/masuk')}
