@@ -31,11 +31,12 @@ export const login = async (credentials) => {
 };
 
 /**
- * Verify OTP and get token
+ * Verifikasi OTP dan dapatkan token
  * @param {object} data - { usernameOrEmail, otp_code }
- * @returns {Promise<object>} Response data with token and user
+ * @param {boolean} remember - Jika true, simpan sesi login (persistent)
+ * @returns {Promise<object>} Data respon dengan token dan user
  */
-export const verifyOTP = async (data) => {
+export const verifyOTP = async (data, remember = true) => {
   const response = await apiRequest('/auth/verify-otp', {
     method: 'POST',
     body: data,
@@ -44,8 +45,8 @@ export const verifyOTP = async (data) => {
 
   // Store token and user data
   if (response.success && response.data) {
-    setToken(response.data.token);
-    setStoredUser(response.data.user);
+    setToken(response.data.token, remember);
+    setStoredUser(response.data.user, remember);
   }
 
   return response;

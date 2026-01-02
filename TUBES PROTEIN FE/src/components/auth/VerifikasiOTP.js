@@ -5,7 +5,7 @@ import Notifikasi from '../notifikasi/NotifikasiComponent';
 import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import pinkLogo from '../../assets/images/pink-logo.png';
 
-function VerifikasiOTP({ onBack, onVerified, email, usernameOrEmail }) {
+function VerifikasiOTP({ onBack, onVerified, email, usernameOrEmail, rememberMe }) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,7 +78,7 @@ function VerifikasiOTP({ onBack, onVerified, email, usernameOrEmail }) {
       const response = await authService.verifyOTP({
         usernameOrEmail,
         otp_code: otpCode,
-      });
+      }, rememberMe);
 
       if (response.success) {
         onVerified(response.data.user);
