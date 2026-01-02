@@ -30,7 +30,7 @@ const RegistrasiPersalinanSchema = Joi.object({
   jenis_kelamin: Joi.string().valid('L', 'P', 'Tidak Diketahui').required(),
   anak_ke: Joi.alternatives().try(Joi.number(), Joi.string()).required(),
   jenis_partus: Joi.string().allow('').optional(),
-  imd_dilakukan: Joi.alternatives().try(Joi.boolean(), Joi.string().valid('true', 'false', '')).optional(),
+  imd_dilakukan: Joi.alternatives().try(Joi.boolean(), Joi.string().valid('true', 'false', ''), Joi.number().valid(0, 1)).optional(),
 
   // Klinis Bayi/Ibu
   as_bayi: Joi.string().allow('').optional(),

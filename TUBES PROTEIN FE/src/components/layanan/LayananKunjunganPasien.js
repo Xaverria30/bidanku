@@ -708,16 +708,17 @@ function LayananKunjunganPasien({ onBack, userData, onToRiwayatDataMasuk, onToRi
                       type="button"
                       onClick={() => setShowPasienModal(true)}
                       style={{
-                        backgroundColor: '#e91e63',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: 'white',
+                        color: 'black',
+                        border: '1px solid #ddd',
                         padding: '8px 15px',
                         borderRadius: '5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '5px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
                       }}
                     >
                       <span>🔍</span> Cari Pasien
