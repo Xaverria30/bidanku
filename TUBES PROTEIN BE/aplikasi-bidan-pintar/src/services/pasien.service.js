@@ -173,7 +173,7 @@ const deletePasien = async (id, userId) => {
   if (result.affectedRows > 0) {
     // Cascading soft delete to pemeriksaan
     await db.query('UPDATE pemeriksaan SET deleted_at = NOW() WHERE id_pasien = ?', [id]);
-    
+
     try {
       await auditService.recordDataLog(userId, 'DELETE', 'pasien', id);
     } catch (auditError) {
@@ -197,7 +197,7 @@ const restorePasien = async (id, userId) => {
   if (result.affectedRows > 0) {
     // Cascading restore to pemeriksaan (only if not already permanent deleted)
     await db.query('UPDATE pemeriksaan SET deleted_at = NULL WHERE id_pasien = ? AND is_permanent_deleted = 0', [id]);
-    
+
     try {
       await auditService.recordDataLog(userId, 'RESTORE', 'pasien', id);
     } catch (auditError) {
@@ -293,13 +293,14 @@ const findOrCreatePasien = async (data, connection) => {
   let existingPasien = [];
 
   // NIK Wajib diisi untuk mencegah data ganda
-  if (!nik || nik.trim().length === 0) {
+  const nikStr = String(nik || '').trim();
+  if (nikStr.length === 0) {
     throw new Error('NIK Pasien wajib diisi untuk identifikasi data.');
   }
 
   [existingPasien] = await connection.query(
     'SELECT id_pasien FROM pasien WHERE nik = ?',
-    [nik]
+    [nikStr]
   );
 
   if (existingPasien.length > 0) {
