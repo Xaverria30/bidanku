@@ -44,6 +44,16 @@ const createRegistrasiKunjunganPasien = async (req, res) => {
     const newRecord = await kunjunganPasienService.createRegistrasiKunjunganPasien(req.body, userId);
     return created(res, 'Registrasi Kunjungan Pasien berhasil disimpan', newRecord);
   } catch (error) {
+    // Debugging: Write error to file
+    const fs = require('fs');
+    const path = require('path');
+    const logPath = path.join(__dirname, '../../debug_kunjungan.log');
+    const timestamp = new Date().toISOString();
+    const logContent = `[${timestamp}] ERROR: ${error.message}\nSTACK: ${error.stack}\n\n`;
+    try {
+      fs.appendFileSync(logPath, logContent);
+    } catch (e) { console.error('Failed to write log', e); }
+
     return serverError(res, 'Gagal menyimpan registrasi Kunjungan Pasien', error);
   }
 };

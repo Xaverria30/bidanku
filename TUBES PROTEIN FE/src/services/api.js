@@ -91,11 +91,16 @@ const handleResponse = async (response, endpoint = '') => {
 
     // Build error message including validation details if available
     let errorMessage = data.message || 'Terjadi kesalahan';
-    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-      // For validation errors, include first field error
-      const firstError = data.errors[0];
-      if (firstError.message) {
-        errorMessage = firstError.message;
+    if (data.errors) {
+      if (Array.isArray(data.errors) && data.errors.length > 0) {
+        // For validation errors (Array), include first field error
+        const firstError = data.errors[0];
+        if (firstError.message) {
+          errorMessage = firstError.message;
+        }
+      } else if (typeof data.errors === 'object' && data.errors.message) {
+        // For server errors (Object), use the inner message
+        errorMessage = data.errors.message;
       }
     }
 

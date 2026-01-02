@@ -79,8 +79,9 @@ const recordDataLog = async (userId, action, tableName, dataId) => {
     `;
     await db.query(query, [id_audit, userId, action, tableName, dataId]);
   } catch (error) {
-    console.error('[AUDIT] Gagal mencatat log data:', error.message);
-    throw error;
+    // Non-blocking: just log the error, don't crash the request
+    console.error('[AUDIT] Gagal mencatat log data (IGNORED):', error.message);
+    // throw error; Remove this to prevent 500 if audit fails (e.g. invalid user ID)
   }
 };
 
