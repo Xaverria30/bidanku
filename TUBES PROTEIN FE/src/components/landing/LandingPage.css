@@ -249,7 +249,7 @@ html {
 
 .card-label {
   font-size: 0.75rem;
-  color: #e07aa3;
+  color: #666666;
   font-weight: 500;
 }
 
@@ -309,7 +309,6 @@ html {
 }
 
 .module-icon {
-  font-size: 2.5rem;
   margin-bottom: 1rem;
   display: inline-block;
   background-color: #d94c89;
@@ -320,6 +319,16 @@ html {
   align-items: center;
   justify-content: center;
   color: white;
+  font-size: 2.5rem;
+  /* For fallback emoji */
+}
+
+.module-icon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  /* Make icons white to match previous text color */
 }
 
 .module-title {
