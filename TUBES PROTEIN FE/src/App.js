@@ -206,6 +206,7 @@ function App() {
                 onVerified={handleOTPVerified}
                 email={otpData.email || resetEmail}
                 usernameOrEmail={otpData.usernameOrEmail}
+                rememberMe={otpData.rememberMe}
               />
             </PublicRoute>
           } />

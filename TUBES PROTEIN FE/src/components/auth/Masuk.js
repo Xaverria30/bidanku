@@ -10,6 +10,7 @@ function Masuk({ onNavigate, onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +27,8 @@ function Masuk({ onNavigate, onLogin }) {
         // Login berhasil, OTP dikirim ke email
         onNavigate('verifikasi-otp', {
           email: response.data?.email || response.email,
-          usernameOrEmail
+          usernameOrEmail,
+          rememberMe // Pass remember preference
         });
       } else {
         setError(response.message || 'Login gagal');
@@ -117,7 +119,11 @@ function Masuk({ onNavigate, onLogin }) {
 
             <div className="form-footer">
               <label className="checkbox-container">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <span>Ingat saya</span>
               </label>
               <a href="#" className="forgot-password" onClick={(e) => { e.preventDefault(); onNavigate('lupa-password'); }}>Lupa password</a>

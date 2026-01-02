@@ -6,44 +6,69 @@
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bidanku.site/api';
 
 /**
- * Get authentication token from localStorage
- * @returns {string|null} JWT token
+ * Mengambil token autentikasi dari localStorage atau sessionStorage
+ * @returns {string|null} Token JWT
  */
-export const getToken = () => localStorage.getItem('token');
+export const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
 /**
- * Set authentication token in localStorage
- * @param {string} token - JWT token
+ * Menyimpan token autentikasi di penyimpanan
+ * @param {string} token - Token JWT
+ * @param {boolean} remember - Jika true, gunakan localStorage (permanen). Jika false, gunakan sessionStorage (hanya sesi ini).
  */
-export const setToken = (token) => localStorage.setItem('token', token);
+export const setToken = (token, remember = true) => {
+  if (remember) {
+    localStorage.setItem('token', token);
+    sessionStorage.removeItem('token'); // Hapus dari penyimpanan lain
+  } else {
+    sessionStorage.setItem('token', token);
+    localStorage.removeItem('token'); // Hapus dari penyimpanan lain
+  }
+};
 
 /**
- * Remove authentication token from localStorage
+ * Menghapus token autentikasi dari semua penyimpanan
  */
-export const removeToken = () => localStorage.removeItem('token');
+export const removeToken = () => {
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+};
 
 /**
- * Get user data from localStorage
- * @returns {object|null} User data
+ * Mengambil data pengguna dari localStorage atau sessionStorage
+ * @returns {object|null} Data pengguna
  */
 export const getStoredUser = () => {
-  const user = localStorage.getItem('user');
+  const user = localStorage.getItem('user') || sessionStorage.getItem('user');
   return user ? JSON.parse(user) : null;
 };
 
 /**
- * Set user data in localStorage
- * @param {object} user - User data
+ * Menyimpan data pengguna di penyimpanan
+ * @param {object} user - Data pengguna
+ * @param {boolean} remember - Jika true, gunakan localStorage. Jika false, gunakan sessionStorage.
  */
-export const setStoredUser = (user) => localStorage.setItem('user', JSON.stringify(user));
+export const setStoredUser = (user, remember = true) => {
+  const userStr = JSON.stringify(user);
+  if (remember) {
+    localStorage.setItem('user', userStr);
+    sessionStorage.removeItem('user');
+  } else {
+    sessionStorage.setItem('user', userStr);
+    localStorage.removeItem('user');
+  }
+};
 
 /**
- * Remove user data from localStorage
+ * Menghapus data pengguna dari semua penyimpanan
  */
-export const removeStoredUser = () => localStorage.removeItem('user');
+export const removeStoredUser = () => {
+  localStorage.removeItem('user');
+  sessionStorage.removeItem('user');
+};
 
 /**
- * Clear all authentication data
+ * Membersihkan semua data autentikasi
  */
 export const clearAuth = () => {
   removeToken();
