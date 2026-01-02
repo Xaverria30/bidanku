@@ -431,7 +431,7 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
                 </div>
 
                 <div className="jadwal-modal-form-group">
-                  <label>Jam *</label>
+                  <label>Jam Mulai *</label>
                   <input
                     type="time"
                     name="jam_mulai"
@@ -445,7 +445,7 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
                 <div className="jadwal-modal-form-group">
                   <label>&nbsp;</label>
                   <div className="time-separator">
-                    <span>-</span>
+                    <span>jam selesai *</span>
                     <input
                       type="time"
                       name="jam_selesai"
@@ -484,7 +484,7 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
                 </div>
 
                 <div className="jadwal-modal-form-group full-width">
-                  <label>Penanggung Jawab</label>
+                  <label>Penanggung Jawab *</label>
                   <input
                     type="text"
                     value={userData?.nama_lengkap || 'Tidak diketahui'}

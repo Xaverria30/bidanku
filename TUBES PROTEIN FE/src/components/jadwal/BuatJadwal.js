@@ -240,7 +240,7 @@ function BuatJadwal({
                     />
                   </div>
                   <div className="jadwal-form-group">
-                    <label>Jam Selesai</label>
+                    <label>Jam Selesai *</label>
                     <input
                       type="time"
                       name="jam_selesai"
