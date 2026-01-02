@@ -468,21 +468,36 @@ const generateSheet = async (workbook, sheetName, jenis_layanan, bulanInt, tahun
   const lastRowIndex = currentRow - 1;
 
   // ==========================================
-  // 4. TANDA TANGAN
+  // 4. TANDA TANGAN (SIGNATURE)
   // ==========================================
   const signRowStart = lastRowIndex + 3;
-  const colIndex = columns.length > 8 ? 9 : columns.length; // Kolom tanda tangan (biasanya agak kanan)
-  const colLetter = worksheet.getColumn(colIndex).letter;
 
-  const dateCell = worksheet.getCell(`${colLetter}${signRowStart}`);
-  dateCell.value = `Bandung, ${new Date(tahunInt, bulanInt, 0).getDate()} ${namaBulan} ${tahunInt}`;
+  // Tentukan 3 kolom terakhir untuk area tanda tangan agar muat dan rapi
+  const lastColIndex = columns.length;
+  const startSignCol = lastColIndex - 2; // Mulai dari 2 kolom sebelum terakhir
+
+  const startColLetter = worksheet.getColumn(startSignCol < 1 ? 1 : startSignCol).letter;
+  const endColLetter = worksheet.getColumn(lastColIndex).letter;
+
+  // 1. Tanggal (Realtime saat export)
+  const today = new Date();
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+  const tanggalSekarang = today.toLocaleDateString('id-ID', options);
+
+  worksheet.mergeCells(`${startColLetter}${signRowStart}:${endColLetter}${signRowStart}`);
+  const dateCell = worksheet.getCell(`${startColLetter}${signRowStart}`);
+  dateCell.value = `Bandung, ${tanggalSekarang}`;
   dateCell.alignment = { horizontal: 'center' };
 
-  const roleCell = worksheet.getCell(`${colLetter}${signRowStart + 1}`);
+  // 2. Peran (Bidan)
+  worksheet.mergeCells(`${startColLetter}${signRowStart + 1}:${endColLetter}${signRowStart + 1}`);
+  const roleCell = worksheet.getCell(`${startColLetter}${signRowStart + 1}`);
   roleCell.value = 'Bidan';
   roleCell.alignment = { horizontal: 'center' };
 
-  const nameCell = worksheet.getCell(`${colLetter}${signRowStart + 5}`);
+  // 3. Nama Bidan
+  worksheet.mergeCells(`${startColLetter}${signRowStart + 6}:${endColLetter}${signRowStart + 6}`); // Beri jarak 4-5 baris untuk tanda tangan
+  const nameCell = worksheet.getCell(`${startColLetter}${signRowStart + 6}`);
   nameCell.value = 'Bdn. Yeye Fahrina, S.Tr.Keb';
   nameCell.font = { bold: true, underline: true };
   nameCell.alignment = { horizontal: 'center' };
