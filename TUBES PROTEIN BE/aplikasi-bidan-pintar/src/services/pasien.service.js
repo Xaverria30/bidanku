@@ -305,10 +305,26 @@ const findOrCreatePasien = async (data, connection) => {
 
   if (existingPasien.length > 0) {
     id_pasien = existingPasien[0].id_pasien;
+
     // Perbarui data pasien yang ada dan pulihkan jika terhapus
+    // Fix: Jangan overwrite data alamat/no_hp dengan NULL jika inputnya kosong
+    const fields = ['nama = ?', 'umur = ?', 'deleted_at = NULL', 'is_permanent_deleted = 0'];
+    const values = [nama, umur];
+
+    if (alamat !== null && alamat !== undefined) {
+      fields.push('alamat = ?');
+      values.push(alamat);
+    }
+    if (no_hp !== null && no_hp !== undefined) {
+      fields.push('no_hp = ?');
+      values.push(no_hp);
+    }
+
+    values.push(id_pasien);
+
     await connection.query(
-      'UPDATE pasien SET nama = ?, umur = ?, alamat = ?, no_hp = ?, deleted_at = NULL WHERE id_pasien = ?',
-      [nama, umur, alamat, no_hp || null, id_pasien]
+      `UPDATE pasien SET ${fields.join(', ')} WHERE id_pasien = ?`,
+      values
     );
   } else {
     // Buat data pasien baru
