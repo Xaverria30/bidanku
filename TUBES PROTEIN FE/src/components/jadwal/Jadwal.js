@@ -9,8 +9,10 @@ import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import jadwalService from '../../services/jadwal.service';
 import pasienService from '../../services/pasien.service';
 
+import { getStoredUser } from '../../services/api';
+
 function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi }) {
-  const userData = JSON.parse(localStorage.getItem('user'));
+  const userData = getStoredUser();
   const [jadwalList, setJadwalList] = useState([]);
   const [pasienList, setPasienList] = useState([]);
   const [filterBulan, setFilterBulan] = useState('');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../services/api';
+import { API_BASE_URL, getToken } from '../../services/api';
 import './Laporan.css';
 import Sidebar from '../shared/Sidebar';
 import pinkLogo from '../../assets/images/pink-logo.png';
@@ -60,7 +60,7 @@ function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfi
   const fetchLaporanData = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const queryParams = new URLSearchParams({
         bulan: selectedBulan,
         tahun: selectedTahun,
@@ -108,7 +108,7 @@ function Laporan({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfi
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = getToken();
     const queryParams = new URLSearchParams({
       format: 'excel',
       bulan: selectedBulan,
