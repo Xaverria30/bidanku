@@ -252,6 +252,15 @@ function BuatJadwal({
               </div>
 
               {/* Form Actions */}
+              <div className="jadwal-form-group full-width" style={{ marginTop: '20px' }}>
+                <label>Penanggung Jawab *</label>
+                <input
+                  type="text"
+                  value={userData?.nama_lengkap || 'Tidak diketahui'}
+                  disabled
+                  placeholder="Akan diisi otomatis"
+                />
+              </div>
               <div className="jadwal-form-actions">
                 <button
                   className="btn-jadwal-submit"

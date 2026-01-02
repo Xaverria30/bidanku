@@ -443,17 +443,14 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
                 </div>
 
                 <div className="jadwal-modal-form-group">
-                  <label>&nbsp;</label>
-                  <div className="time-separator">
-                    <span>jam selesai *</span>
-                    <input
-                      type="time"
-                      name="jam_selesai"
-                      value={formData.jam_selesai}
-                      onChange={handleInputChange}
-                      placeholder="XX:XX"
-                    />
-                  </div>
+                  <label>Jam Selesai *</label>
+                  <input
+                    type="time"
+                    name="jam_selesai"
+                    value={formData.jam_selesai}
+                    onChange={handleInputChange}
+                    placeholder="XX:XX"
+                  />
                 </div>
 
                 <div className="jadwal-modal-form-group full-width">
