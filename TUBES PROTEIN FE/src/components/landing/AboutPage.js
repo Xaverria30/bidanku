@@ -196,7 +196,7 @@ const AboutPage = () => {
 
             {/* Footer */}
             <footer className="landing-footer">
-                <p>© 2024 Klinik Bidan Yeye | Sistem Informasi Manajemen Klinik</p>
+                <p>© 2015 Klinik Bidan Yeye | Sistem Informasi Manajemen Klinik</p>
                 <p>Platform digital untuk pengelolaan data pasien dan pelayanan klinik</p>
             </footer>
         </div>
