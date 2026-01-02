@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import bidanYeye from '../../assets/images/bidan-yeye.jpg';
 import pinkLogo from '../../assets/images/logo-stetoskop.png';
+import navbarLogo from '../../assets/images/navbar-pink-logo.png';
+import iconRegistrasi from '../../assets/images/modules/icon-registrasi.png';
+import iconRekamMedis from '../../assets/images/modules/icon-rekam-medis.png';
+import iconDataPasien from '../../assets/images/modules/icon-data-pasien.png';
+import iconIbuBayi from '../../assets/images/modules/icon-ibu-bayi.png';
+import iconRiwayat from '../../assets/images/modules/icon-riwayat.png';
+import iconLaporan from '../../assets/images/modules/icon-laporan.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -12,37 +19,37 @@ const LandingPage = () => {
       id: 1,
       title: 'Registrasi Pasien',
       description: 'Akses untuk mendaftarkan dan memasukkan formulir pasien dan lansia',
-      icon: '📋'
+      icon: iconRegistrasi
     },
     {
       id: 2,
       title: 'Rekam Medis',
       description: 'Cakup data pemeriksaan pasien secara terstruktur dan detail',
-      icon: '📄'
+      icon: iconRekamMedis
     },
     {
       id: 3,
       title: 'Data Pasien',
       description: 'Akses dan informasi database sesuai dengan pencatatan yang tersimpan',
-      icon: '👥'
+      icon: iconDataPasien
     },
     {
       id: 4,
       title: 'Pemantauan Ibu & Bayi',
       description: 'Monitor perkembangan keselamatan ibu hamil dan bayi dalam kandungan',
-      icon: '❤️'
+      icon: iconIbuBayi
     },
     {
       id: 5,
       title: 'Riwayat Pelayanan',
       description: 'Lihat semua pelayanan yang telah diberikan dengan historis yang jelas',
-      icon: '📚'
+      icon: iconRiwayat
     },
     {
       id: 6,
       title: 'Laporan & Statistik',
       description: 'Generasi laporan pelayanan dan statistik pasien untuk evaluasi dan perencanaan yang lebih baik',
-      icon: '📊'
+      icon: iconLaporan
     }
   ];
 
@@ -53,7 +60,7 @@ const LandingPage = () => {
         <div className="header-container">
           <div className="logo-section" onClick={() => navigate('/beranda')}>
             <div className="header-logo-wrapper">
-              <img src={pinkLogo} alt="Logo" />
+              <img src={navbarLogo} alt="Logo" />
             </div>
             <div className="logo-details">
               <h1 className="logo-text">Rumah Muaffa Bidan Yeye</h1>
@@ -131,7 +138,13 @@ const LandingPage = () => {
           <div className="modules-grid">
             {modules.map((module) => (
               <div key={module.id} className="module-card">
-                <div className="module-icon">{module.icon}</div>
+                <div className="module-icon">
+                  {typeof module.icon === 'string' && module.icon.length < 5 ? (
+                    module.icon
+                  ) : (
+                    <img src={module.icon} alt={module.title} />
+                  )}
+                </div>
                 <h3 className="module-title">{module.title}</h3>
                 <p className="module-description">{module.description}</p>
               </div>
