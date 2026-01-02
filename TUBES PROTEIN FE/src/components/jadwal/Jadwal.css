@@ -345,12 +345,12 @@
 }
 
 .jadwal-btn-edit:hover {
-  background: #4A90E2;
+  background: rgba(255, 255, 255, 0.4);
   transform: scale(1.1);
 }
 
 .jadwal-btn-delete:hover {
-  background: #ff4444;
+  background: rgba(255, 255, 255, 0.4);
   transform: scale(1.1);
 }
 
