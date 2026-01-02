@@ -98,7 +98,11 @@ function VerifikasiOTP({ onBack, onVerified, email, usernameOrEmail, rememberMe 
       const response = await authService.resendOTP({ usernameOrEmail });
 
       if (response.success) {
-        alert('Kode OTP telah dikirim ulang ke ' + email);
+        showNotifikasi({
+          type: 'otp-resend',
+          onConfirm: hideNotifikasi,
+          onCancel: hideNotifikasi
+        });
         setOtp(['', '', '', '', '', '']);
         setError('');
         inputRefs.current[0]?.focus();

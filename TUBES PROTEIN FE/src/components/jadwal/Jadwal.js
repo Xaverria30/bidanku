@@ -158,7 +158,7 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
 
       // Default to warning immutable for other errors (like editing auto-generated)
       showNotifikasi({
-        type: 'warning-immutable',
+        type: 'warning-immutable-edit',
         onConfirm: hideNotifikasi,
         onCancel: hideNotifikasi
       });

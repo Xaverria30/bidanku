@@ -65,8 +65,10 @@ function Notifikasi({
       case 'register-success':
         return 'Berhasil!';
       case 'otp-sent':
+      case 'otp-resend':
         return 'Perhatian!';
       case 'warning-immutable':
+      case 'warning-immutable-edit':
         return 'Peringatan!';
       default:
         return message;
@@ -99,13 +101,17 @@ function Notifikasi({
         return 'Akun Anda telah berhasil dibuat.';
       case 'warning-immutable':
         return 'Jadwal ini dibuat secara otomatis dari data layanan, sehingga tidak dapat dihapus langsung dari menu Jadwal. Untuk menghapus jadwal ini, silakan hapus data pemeriksaan layanan terkait pada menu layanan.';
+      case 'warning-immutable-edit':
+        return 'Jadwal ini dibuat secara otomatis dari data layanan, sehingga tidak dapat diedit langsung dari menu Jadwal. Untuk mengedit jadwal ini, silakan edit data pemeriksaan layanan terkait pada menu layanan.';
+      case 'otp-resend':
+        return 'Kode verifikasi telah dikirim ulang ke email Anda. Silakan periksa kotak masuk.';
       default:
         return '';
     }
   };
 
   const isConfirmDialog = ['confirm-save', 'confirm-edit', 'confirm-delete', 'confirm-logout'].includes(type);
-  const isSuccessNotif = ['success', 'success-login', 'cek-email', 'register-success', 'otp-sent', 'delete-success', 'warning-immutable'].includes(type);
+  const isSuccessNotif = ['success', 'success-login', 'cek-email', 'register-success', 'otp-sent', 'delete-success', 'warning-immutable', 'warning-immutable-edit', 'otp-resend'].includes(type);
 
   return (
     <div className="notifikasi-overlay" onClick={isConfirmDialog ? null : onCancel}>
