@@ -141,23 +141,24 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
       fetchJadwal();
     } catch (error) {
       console.error('Error saving jadwal:', error);
-      console.error('Error data:', error.data);
-      console.error('Error status:', error.status);
 
-      // Format validation errors for display
-      let errorMessage = 'Gagal menyimpan jadwal';
-      let errorDetail = '';
-
-      if (error.data && error.data.errors && Array.isArray(error.data.errors)) {
-        errorMessage = 'Validasi gagal:';
-        errorDetail = error.data.errors.map(e => `${e.field}: ${e.message}`).join('\n');
-        console.error('Validation errors:', errorDetail);
+      // Check if it's a validation error
+      if (error.data && error.data.errors) {
+        // Keep existing validation handling
+        let errorDetail = error.data.errors.map(e => `${e.field}: ${e.message}`).join('\n');
+        showNotifikasi({
+          type: 'error',
+          message: 'Validasi gagal',
+          detail: errorDetail,
+          onConfirm: hideNotifikasi,
+          onCancel: hideNotifikasi
+        });
+        return;
       }
 
+      // Default to warning immutable for other errors (like editing auto-generated)
       showNotifikasi({
-        type: 'error',
-        message: errorMessage,
-        detail: errorDetail,
+        type: 'warning-immutable',
         onConfirm: hideNotifikasi,
         onCancel: hideNotifikasi
       });
@@ -202,8 +203,7 @@ function Jadwal({ onBack, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil
     } catch (error) {
       console.error('Error deleting jadwal:', error);
       showNotifikasi({
-        type: 'error',
-        message: 'Gagal menghapus jadwal',
+        type: 'warning-immutable',
         onConfirm: hideNotifikasi,
         onCancel: hideNotifikasi
       });
