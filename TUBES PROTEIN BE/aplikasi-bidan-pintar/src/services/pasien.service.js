@@ -223,7 +223,11 @@ const restorePasien = async (id, userId) => {
 const deletePasienPermanent = async (id, userId) => {
   // Kita tidak melakukan DELETE fisik karena akan menghilangkan Nama Pasien di Audit Log
   // Solusi: Tandai sebagai permanent deleted, dan acak NIK agar bisa dipakai ulang
-  const scrambledNik = `DEL-${uuidv4().substring(0, 8)}-${Date.now()}`;
+  // Fix: Shorten scrambled NIK to fit in varchar(20)
+  // Format: DEL-TIMESTAMP(base36)-RAND(4) => DEL-XXXXXX-XXXX (~16-17 chars)
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const scrambledNik = `DEL-${timestamp}-${random}`;
 
   const query = `
     UPDATE pasien 
