@@ -224,7 +224,6 @@ const updateKunjunganPasien = async (id, data, userId) => {
     await connection.query(
       `UPDATE layanan_kunjungan_pasien 
        SET tanggal = ?, no_reg = ?, jenis_kunjungan = ?, 
-           -- nama_pasien = ?, nik_pasien = ?, umur_pasien = ?, -- Jangan update master 
            bb_pasien = ?, td_pasien = ?, nama_wali = ?, nik_wali = ?, umur_wali = ?, 
            keluhan = ?, diagnosa = ?, terapi_obat = ?, keterangan = ?
        WHERE id_kunjungan = ?`,
