@@ -30,20 +30,26 @@
 }
 
 .kunjungan-header-logo {
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
 }
 
 .kunjungan-header-logo-img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .kunjungan-header-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   color: #333;
   text-shadow: none;
 }
@@ -306,6 +312,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -577,28 +584,28 @@
   .kunjungan-content {
     flex-direction: column;
   }
-  
+
   .kunjungan-sidebar {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
     padding: 20px;
   }
-  
+
   .kunjungan-sidebar-profile {
     flex-direction: row;
   }
-  
+
   .kunjungan-profile-avatar {
     width: 60px;
     height: 60px;
   }
-  
+
   .kunjungan-sidebar-menu {
     flex-direction: row;
     gap: 15px;
   }
-  
+
   .btn-profil-kunjungan {
     width: auto;
     padding: 8px 16px;
@@ -609,27 +616,27 @@
   .kunjungan-header {
     padding: 15px 20px;
   }
-  
+
   .kunjungan-header-title {
     font-size: 16px;
   }
-  
+
   .kunjungan-main-area {
     padding: 20px;
   }
-  
+
   .kunjungan-action-buttons {
     flex-direction: column;
   }
-  
+
   .kunjungan-form-row {
     flex-direction: column;
   }
-  
+
   .kunjungan-sidebar {
     flex-direction: column;
   }
-  
+
   .kunjungan-sidebar-menu {
     flex-direction: column;
   }
@@ -648,7 +655,7 @@
   .kunjungan-header-title {
     font-size: 14px;
   }
-  
+
   .btn-kembali-kunjungan {
     padding: 8px 16px;
     font-size: 12px;
@@ -657,11 +664,11 @@
   .kunjungan-content {
     flex-direction: column;
   }
-  
+
   .kunjungan-form-container {
     padding: 15px;
   }
-  
+
   .kunjungan-form-section {
     padding: 12px;
   }
