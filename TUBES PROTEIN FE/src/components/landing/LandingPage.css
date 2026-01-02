@@ -46,9 +46,21 @@ html {
   flex-direction: column;
 }
 
-.logo-icon {
-  font-size: 2rem;
-  color: #d94c89;
+.header-logo-wrapper {
+  width: 50px;
+  height: 50px;
+  background: #fce4ec;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-logo-wrapper img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .logo-text {
@@ -237,7 +249,7 @@ html {
 
 .card-label {
   font-size: 0.75rem;
-  color: #999;
+  color: #e07aa3;
   font-weight: 500;
 }
 
