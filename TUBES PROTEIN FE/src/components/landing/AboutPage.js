@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import './AboutPage.css';
 import './LandingPage.css'; // Find a way to share styles or import them
 
+import navbarLogo from '../../assets/images/navbar-pink-logo.png';
+
+import iconVisi from '../../assets/images/icons/icon-visi.png';
+import iconMisi from '../../assets/images/icons/icon-misi.png';
+
+import iconServiceKehamilan from '../../assets/images/icons/icon-service-kehamilan.png';
+import iconServicePersalinan from '../../assets/images/icons/icon-service-persalinan.png';
+import iconServiceNifas from '../../assets/images/icons/icon-service-nifas.png';
+import iconServiceKB from '../../assets/images/icons/icon-service-kb.png';
+import iconServiceImunisasi from '../../assets/images/icons/icon-service-imunisasi.png';
+import iconServiceKesehatan from '../../assets/images/icons/icon-service-kesehatan.png';
+
 const AboutPage = () => {
     const navigate = useNavigate();
 
@@ -12,7 +24,9 @@ const AboutPage = () => {
             <header className="landing-header">
                 <div className="header-container">
                     <div className="logo-section" onClick={() => navigate('/beranda')}>
-                        <div className="logo-icon">🏥</div>
+                        <div className="header-logo-wrapper">
+                            <img src={navbarLogo} alt="Logo" />
+                        </div>
                         <div className="logo-details">
                             <h1 className="logo-text">Rumah Muaffa Bidan Yeye</h1>
                             <p className="logo-subtitle">SISTEM INFORMASI BIDAN DIGITAL</p>
@@ -58,7 +72,7 @@ const AboutPage = () => {
                     <div className="visi-misi-grid">
                         <div className="visi-card">
                             <div className="visi-icon-wrapper">
-                                <div className="visi-icon">💗</div>
+                                <img src={iconVisi} alt="Visi" className="visi-icon-img" />
                             </div>
                             <h3 className="card-title">Visi</h3>
                             <p className="card-description">
@@ -70,7 +84,7 @@ const AboutPage = () => {
 
                         <div className="misi-card">
                             <div className="misi-icon-wrapper">
-                                <div className="misi-icon">🎗️</div>
+                                <img src={iconMisi} alt="Misi" className="misi-icon-img" />
                             </div>
                             <h3 className="card-title">Misi</h3>
                             <p className="card-description">
@@ -81,13 +95,15 @@ const AboutPage = () => {
                         </div>
                     </div>
 
+
+
                     {/* Layanan Kami */}
                     <div className="services-section">
                         <h2 className="services-title">Layanan Kami</h2>
                         <div className="services-grid">
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">📋</span>
+                                    <img src={iconServiceKehamilan} alt="Kehamilan" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Pemeriksaan Kehamilan</h4>
@@ -97,7 +113,7 @@ const AboutPage = () => {
 
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">👶</span>
+                                    <img src={iconServicePersalinan} alt="Persalinan" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Persalinan Normal</h4>
@@ -107,7 +123,7 @@ const AboutPage = () => {
 
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">🤱</span>
+                                    <img src={iconServiceNifas} alt="Nifas" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Perawatan Nifas</h4>
@@ -117,7 +133,7 @@ const AboutPage = () => {
 
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">📋</span>
+                                    <img src={iconServiceKB} alt="KB" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Konsultasi KB</h4>
@@ -127,7 +143,7 @@ const AboutPage = () => {
 
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">💉</span>
+                                    <img src={iconServiceImunisasi} alt="Imunisasi" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Imunisasi Bayi</h4>
@@ -137,7 +153,7 @@ const AboutPage = () => {
 
                             <div className="service-item">
                                 <div className="service-icon-bg pink-light">
-                                    <span className="service-icon">🩺</span>
+                                    <img src={iconServiceKesehatan} alt="Kesehatan" className="service-icon-img" />
                                 </div>
                                 <div className="service-content">
                                     <h4>Konsultasi Kesehatan</h4>
