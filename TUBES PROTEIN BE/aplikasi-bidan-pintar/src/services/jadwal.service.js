@@ -117,7 +117,6 @@ const listJadwal = async (bulan, tahun, layanan) => {
           LIMIT 1
         )
     ) AS gabungan
-    ) AS gabungan
     WHERE 1=1
   `;
   const params = [];
