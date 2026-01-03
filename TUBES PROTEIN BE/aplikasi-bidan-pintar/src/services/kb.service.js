@@ -129,7 +129,7 @@ const getKBById = async (id_pemeriksaan) => {
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_kb kb ON p.id_pemeriksaan = kb.id_pemeriksaan
-    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'KB' AND j.tanggal = kb.kunjungan_ulang
+    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'KB' AND j.tanggal = DATE(kb.kunjungan_ulang)
     WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'KB' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
