@@ -117,9 +117,15 @@ const listJadwal = async (bulan, tahun, layanan) => {
           LIMIT 1
         )
     ) AS gabungan
-    WHERE gabungan.tanggal >= CURDATE()  -- Filter: hanya tampilkan jadwal hari ini dan masa depan
+    ) AS gabungan
+    WHERE 1=1
   `;
   const params = [];
+
+  // Default: Show upcoming schedules only if NO specific date filter is applied
+  if (!bulan && !tahun) {
+    query += ' AND gabungan.tanggal >= CURDATE()';
+  }
 
   if (bulan) {
     query += ' AND MONTH(gabungan.tanggal) = ?';
