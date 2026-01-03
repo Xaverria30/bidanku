@@ -112,6 +112,15 @@ const getANCById = async (id_pemeriksaan) => {
     WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'ANC' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
+
+  if (rows[0]) {
+    // Priority: Schedule time > Saved Time > Default
+    // If we found a linked schedule, use its time for jam_hpl
+    if (rows[0].jam_mulai) {
+      rows[0].jam_hpl = rows[0].jam_mulai;
+    }
+  }
+
   return rows[0] || null;
 };
 

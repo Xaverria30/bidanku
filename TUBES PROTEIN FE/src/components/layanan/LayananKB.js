@@ -14,6 +14,13 @@ import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
 import DataSampahLayanan from './DataSampahLayanan';
 
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -33,7 +40,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
     id_pasien: '',
     jenis_layanan: 'KB',
     tanggal: '',
-    jam_mulai: '',
+    jam_mulai: getCurrentTime(),
     jam_selesai: ''
   });
   const [filterType, setFilterType] = useState('Semua Data');
@@ -67,9 +74,9 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getFullYear() === today.getFullYear() && 
-               itemDay.getMonth() === today.getMonth() && 
-               itemDay.getDate() === today.getDate();
+        return itemDay.getFullYear() === today.getFullYear() &&
+          itemDay.getMonth() === today.getMonth() &&
+          itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -109,7 +116,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
     alamat: '',
     nomor_hp: '',
     kunjungan_ulang: '',
-    jam_kunjungan_ulang: '08:00',
+    jam_kunjungan_ulang: getCurrentTime(),
     jam_kunjungan_ulang_selesai: '',
     catatan: ''
   });
@@ -212,7 +219,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
       id_pasien: '',
       jenis_layanan: 'KB',
       tanggal: '',
-      jam_mulai: '',
+      jam_mulai: getCurrentTime(),
       jam_selesai: ''
     });
     setShowJadwalModal(true);
@@ -258,7 +265,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
         id_pasien: '',
         jenis_layanan: 'KB',
         tanggal: '',
-        jam_mulai: '',
+        jam_mulai: getCurrentTime(),
         jam_selesai: ''
       });
     } catch (error) {
@@ -393,7 +400,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
       alamat: '',
       nomor_hp: '',
       kunjungan_ulang: '',
-      jam_kunjungan_ulang: '08:00',
+      jam_kunjungan_ulang: getCurrentTime(),
       jam_kunjungan_ulang_selesai: '',
       catatan: ''
     });
@@ -429,7 +436,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
           alamat: data.alamat || '',
           nomor_hp: data.no_hp || '',
           kunjungan_ulang: data.kunjungan_ulang || '',
-          jam_kunjungan_ulang: data.jam_kunjungan_ulang || '08:00',
+          jam_kunjungan_ulang: data.jam_kunjungan_ulang || getCurrentTime(),
           jam_kunjungan_ulang_selesai: data.jam_kunjungan_ulang_selesai || '',
           catatan: data.catatan || ''
         });
@@ -594,7 +601,7 @@ function LayananKB({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAku
                     <button
                       className="kb-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                      style={{ 
+                      style={{
                         background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
                         borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)',
                         width: filterType !== 'Semua Data' ? 'auto' : '45px',

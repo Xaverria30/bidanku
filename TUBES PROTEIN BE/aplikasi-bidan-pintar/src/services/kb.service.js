@@ -124,13 +124,23 @@ const getKBById = async (id_pemeriksaan) => {
       kb.bb_ayah,
       DATE_FORMAT(kb.kunjungan_ulang, '%Y-%m-%d') as kunjungan_ulang,
       kb.jam_kunjungan_ulang,
-      kb.catatan
+      kb.catatan,
+      j.jam_mulai as jam_jadwal_from_jadwal
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_kb kb ON p.id_pemeriksaan = kb.id_pemeriksaan
+    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'KB' AND j.tanggal = kb.kunjungan_ulang
     WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'KB' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
+
+  if (rows[0]) {
+    // Use schedule time if available
+    if (rows[0].jam_jadwal_from_jadwal) {
+      rows[0].jam_kunjungan_ulang = rows[0].jam_jadwal_from_jadwal;
+    }
+  }
+
   return rows[0] || null;
 };
 

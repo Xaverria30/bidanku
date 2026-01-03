@@ -14,6 +14,13 @@ import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
 import DataSampahLayanan from './DataSampahLayanan';
 
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -33,7 +40,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
     id_pasien: '',
     jenis_layanan: 'Imunisasi',
     tanggal: '',
-    jam_mulai: '',
+    jam_mulai: getCurrentTime(),
     jam_selesai: ''
   });
   const [filterType, setFilterType] = useState('Semua Data');
@@ -67,9 +74,9 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getFullYear() === today.getFullYear() && 
-               itemDay.getMonth() === today.getMonth() && 
-               itemDay.getDate() === today.getDate();
+        return itemDay.getFullYear() === today.getFullYear() &&
+          itemDay.getMonth() === today.getMonth() &&
+          itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -107,7 +114,8 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
     tb: '',
     bb: '',
     jadwal_selanjutnya: '',
-    jam_jadwal_selanjutnya: '09:00',
+    jadwal_selanjutnya: '',
+    jam_jadwal_selanjutnya: getCurrentTime(),
     jam_jadwal_selanjutnya_selesai: '',
     nomor_hp: '',
     pengobatan: ''
@@ -218,7 +226,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       id_pasien: '',
       jenis_layanan: 'Imunisasi',
       tanggal: '',
-      jam_mulai: '',
+      jam_mulai: getCurrentTime(),
       jam_selesai: ''
     });
     setShowJadwalModal(true);
@@ -264,7 +272,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
         id_pasien: '',
         jenis_layanan: 'Imunisasi',
         tanggal: '',
-        jam_mulai: '',
+        jam_mulai: getCurrentTime(),
         jam_selesai: ''
       });
     } catch (error) {
@@ -383,7 +391,8 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
       tb: '',
       bb: '',
       jadwal_selanjutnya: '',
-      jam_jadwal_selanjutnya: '09:00',
+      jadwal_selanjutnya: '',
+      jam_jadwal_selanjutnya: getCurrentTime(),
       jam_jadwal_selanjutnya_selesai: '',
       nomor_hp: '',
       pengobatan: ''
@@ -416,7 +425,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
           tb: data.tb_bayi || '',
           bb: data.bb_bayi || '',
           jadwal_selanjutnya: data.jadwal_selanjutnya || '',
-          jam_jadwal_selanjutnya: data.jam_jadwal_selanjutnya || '09:00',
+          jam_jadwal_selanjutnya: data.jam_jadwal_selanjutnya || getCurrentTime(),
           jam_jadwal_selanjutnya_selesai: data.jam_jadwal_selanjutnya_selesai || '',
           nomor_hp: data.no_hp || '',
           pengobatan: data.pengobatan || ''
@@ -567,7 +576,7 @@ function LayananImunisasi({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatM
                     <button
                       className="imunisasi-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                      style={{ 
+                      style={{
                         background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
                         borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)'
                       }}
