@@ -125,7 +125,8 @@ const getKBById = async (id_pemeriksaan) => {
       DATE_FORMAT(kb.kunjungan_ulang, '%Y-%m-%d') as kunjungan_ulang,
       kb.jam_kunjungan_ulang,
       kb.catatan,
-      j.jam_mulai as jam_jadwal_from_jadwal
+      j.jam_mulai as jam_jadwal_from_jadwal,
+      j.jam_selesai as jam_jadwal_selesai_from_jadwal
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_kb kb ON p.id_pemeriksaan = kb.id_pemeriksaan
@@ -138,6 +139,9 @@ const getKBById = async (id_pemeriksaan) => {
     // Use schedule time if available
     if (rows[0].jam_jadwal_from_jadwal) {
       rows[0].jam_kunjungan_ulang = rows[0].jam_jadwal_from_jadwal;
+    }
+    if (rows[0].jam_jadwal_selesai_from_jadwal) {
+      rows[0].jam_kunjungan_ulang_selesai = rows[0].jam_jadwal_selesai_from_jadwal;
     }
   }
 

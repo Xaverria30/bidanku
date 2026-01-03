@@ -119,6 +119,9 @@ const getANCById = async (id_pemeriksaan) => {
     if (rows[0].jam_mulai) {
       rows[0].jam_hpl = rows[0].jam_mulai;
     }
+    if (rows[0].jam_selesai) {
+      rows[0].jam_hpl_selesai = rows[0].jam_selesai;
+    }
   }
 
   return rows[0] || null;
