@@ -142,6 +142,7 @@ const getImunisasiById = async (id_pemeriksaan) => {
       im.pengobatan,
       im.jadwal_selanjutnya,
       im.jam_jadwal_selanjutnya,
+      im.jam_jadwal_selanjutnya_selesai,
       im.no_hp_kontak as no_hp,
       pas.alamat,
       j.jam_mulai as jam_jadwal_from_jadwal,
