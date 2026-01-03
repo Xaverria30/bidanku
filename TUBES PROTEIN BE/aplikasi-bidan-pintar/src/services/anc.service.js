@@ -103,6 +103,7 @@ const getANCById = async (id_pemeriksaan) => {
       DATE_FORMAT(anc.hpht, '%Y-%m-%d') as hpht,
       DATE_FORMAT(anc.hpl, '%Y-%m-%d') as hpl,
       anc.jam_hpl,
+      anc.jam_hpl_selesai,
       anc.hasil_pemeriksaan, anc.tindakan, anc.keterangan,
       j.jam_mulai, j.jam_selesai
     FROM pemeriksaan p

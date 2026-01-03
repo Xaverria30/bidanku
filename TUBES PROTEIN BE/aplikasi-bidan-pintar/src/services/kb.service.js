@@ -124,6 +124,7 @@ const getKBById = async (id_pemeriksaan) => {
       kb.bb_ayah,
       DATE_FORMAT(kb.kunjungan_ulang, '%Y-%m-%d') as kunjungan_ulang,
       kb.jam_kunjungan_ulang,
+      kb.jam_kunjungan_ulang_selesai,
       kb.catatan,
       j.jam_mulai as jam_jadwal_from_jadwal,
       j.jam_selesai as jam_jadwal_selesai_from_jadwal
