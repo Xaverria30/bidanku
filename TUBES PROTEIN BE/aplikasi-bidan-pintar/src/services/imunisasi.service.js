@@ -143,13 +143,24 @@ const getImunisasiById = async (id_pemeriksaan) => {
       im.jadwal_selanjutnya,
       im.jam_jadwal_selanjutnya,
       im.no_hp_kontak as no_hp,
-      pas.alamat
+      pas.alamat,
+      j.jam_mulai as jam_jadwal_from_jadwal
     FROM pemeriksaan p
     LEFT JOIN layanan_imunisasi im ON p.id_pemeriksaan = im.id_pemeriksaan
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
+    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'Imunisasi' AND j.tanggal = im.jadwal_selanjutnya
     WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'Imunisasi' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
+
+  if (rows[0]) {
+    // Priority: Schedule time > Saved Time > Default
+    // If we found a linked schedule, use its time
+    if (rows[0].jam_jadwal_from_jadwal) {
+      rows[0].jam_jadwal_selanjutnya = rows[0].jam_jadwal_from_jadwal;
+    }
+  }
+
   return rows[0] || null;
 };
 

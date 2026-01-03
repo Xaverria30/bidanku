@@ -14,6 +14,13 @@ import { useNotifikasi } from '../notifikasi/useNotifikasi';
 import PilihPasienModal from '../shared/PilihPasienModal';
 import DataSampahLayanan from './DataSampahLayanan';
 
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAkun, onToProfil, onToTambahPasien, onToTambahPengunjung, onToBuatLaporan, onToPersalinan, onToANC, onToKB, onToImunisasi, onToJadwal }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -33,7 +40,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     id_pasien: '',
     jenis_layanan: 'ANC',
     tanggal: '',
-    jam_mulai: '',
+    jam_mulai: getCurrentTime(),
     jam_selesai: ''
   });
   const [filterType, setFilterType] = useState('Semua Data');
@@ -67,9 +74,9 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
       const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
 
       if (filterType === 'Hari Ini') {
-        return itemDay.getFullYear() === today.getFullYear() && 
-               itemDay.getMonth() === today.getMonth() && 
-               itemDay.getDate() === today.getDate();
+        return itemDay.getFullYear() === today.getFullYear() &&
+          itemDay.getMonth() === today.getMonth() &&
+          itemDay.getDate() === today.getDate();
       }
 
       if (filterType === 'Minggu Ini') {
@@ -106,7 +113,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
     no_hp: '',
     hpht: '',
     hpl: '',
-    jam_hpl: '08:00',
+    jam_hpl: getCurrentTime(),
     jam_hpl_selesai: '',
     hasil_pemeriksaan: '',
     keterangan: ''
@@ -218,7 +225,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
       id_pasien: '',
       jenis_layanan: 'ANC',
       tanggal: '',
-      jam_mulai: '',
+      jam_mulai: getCurrentTime(),
       jam_selesai: ''
     });
     setShowJadwalModal(true);
@@ -264,7 +271,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
         id_pasien: '',
         jenis_layanan: 'ANC',
         tanggal: '',
-        jam_mulai: '',
+        jam_mulai: getCurrentTime(),
         jam_selesai: ''
       });
     } catch (error) {
@@ -376,7 +383,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
       no_hp: '',
       hpht: '',
       hpl: '',
-      jam_hpl: '08:00',
+      jam_hpl: getCurrentTime(),
       jam_hpl_selesai: '',
       hasil_pemeriksaan: '',
       keterangan: ''
@@ -404,7 +411,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
           no_hp: data.no_hp || '',
           hpht: data.hpht || '',
           hpl: data.hpl || '',
-          jam_hpl: data.jam_hpl || '08:00',
+          jam_hpl: data.jam_hpl || getCurrentTime(),
           jam_hpl_selesai: data.jam_hpl_selesai || '',
           hasil_pemeriksaan: data.hasil_pemeriksaan || '',
           keterangan: data.keterangan || '',
@@ -570,7 +577,7 @@ function LayananANC({ onBack, userData, onToRiwayatDataMasuk, onToRiwayatMasukAk
                     <button
                       className="anc-filter-btn"
                       onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                      style={{ 
+                      style={{
                         background: filterType !== 'Semua Data' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.3)',
                         borderColor: filterType !== 'Semua Data' ? 'white' : 'rgba(255, 255, 255, 0.5)'
                       }}
