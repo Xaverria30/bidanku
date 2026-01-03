@@ -108,7 +108,7 @@ const getANCById = async (id_pemeriksaan) => {
     FROM pemeriksaan p
     LEFT JOIN pasien pas ON p.id_pasien = pas.id_pasien
     LEFT JOIN layanan_anc anc ON p.id_pemeriksaan = anc.id_pemeriksaan
-    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'ANC' AND j.tanggal = p.tanggal_pemeriksaan
+    LEFT JOIN jadwal j ON p.id_pasien = j.id_pasien AND j.jenis_layanan = 'ANC' AND j.tanggal = anc.hpl
     WHERE p.id_pemeriksaan = ? AND p.jenis_layanan = 'ANC' AND p.deleted_at IS NULL
   `;
   const [rows] = await db.query(query, [id_pemeriksaan]);
